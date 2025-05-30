@@ -1,0 +1,274 @@
+/* src/components/GestionUsuarios.css */
+
+.gestion-usuarios-container {
+  padding: 30px;
+  background-color: #f8f9fa;
+  min-height: 100vh; /* Ajusta si tienes un header/footer */
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+.gestion-usuarios-title {
+  font-size: 2em;
+  color: #34495e;
+  margin-bottom: 30px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin-bottom: 30px;
+}
+
+.card h3 {
+  font-size: 1.5em;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+/* --- Mensajes de Feedback --- */
+.message-feedback {
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.message-feedback.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message-feedback.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Formulario de Nuevo Usuario --- */
+.new-user-form {
+  display: grid;
+  grid-template-columns: 1fr; /* Una columna por defecto */
+  gap: 15px;
+  max-width: 500px; /* Limita el ancho del formulario */
+  margin: 0 auto; /* Centra el formulario */
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.new-user-form input[type="text"],
+.new-user-form input[type="password"],
+.new-user-form select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 1em;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.new-user-form input[type="text"]:focus,
+.new-user-form input[type="password"]:focus,
+.new-user-form select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+}
+
+.new-user-form button.create-user-button {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #28a745; /* Color verde para crear */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-weight: bold;
+}
+
+.new-user-form button.create-user-button:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.new-user-form button.create-user-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* --- Tabla de Usuarios --- */
+.table-responsive {
+  overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.users-table th,
+.users-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+  vertical-align: middle; /* Alinea el contenido verticalmente */
+}
+
+.users-table th {
+  background-color: #f2f2f2;
+  font-weight: 600;
+  color: #333;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+.users-table tr:nth-child(even) {
+  background-color: #f9f9f9; /* Rayas para mejor legibilidad */
+}
+
+.users-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.status-active {
+  color: #28a745; /* Verde para activo */
+  font-weight: bold;
+}
+
+.status-inactive {
+  color: #dc3545; /* Rojo para inactivo */
+  font-weight: bold;
+}
+
+/* Estilos para los inputs/selects de edición */
+.edit-input,
+.edit-select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 0.95em;
+}
+
+/* Estilos para botones de acción en la tabla */
+.action-button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+  margin-right: 5px; /* Espacio entre botones */
+  white-space: nowrap; /* Evita que el texto del botón se rompa */
+}
+
+.action-button:last-child {
+  margin-right: 0;
+}
+
+.edit-button {
+  background-color: #007bff; /* Azul para editar */
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.toggle-status-button.deactivate {
+  background-color: #ffc107; /* Amarillo para desactivar */
+  color: #333;
+}
+
+.toggle-status-button.deactivate:hover {
+  background-color: #e0a800;
+}
+
+.toggle-status-button.activate {
+  background-color: #17a2b8; /* Azul claro para activar */
+  color: white;
+}
+
+.toggle-status-button.activate:hover {
+  background-color: #138496;
+}
+
+.delete-button {
+  background-color: #dc3545; /* Rojo para eliminar */
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+.save-button {
+  background-color: #28a745; /* Verde para guardar */
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #218838;
+}
+
+.cancel-button {
+  background-color: #6c757d; /* Gris para cancelar */
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #5a6268;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .new-user-form {
+    grid-template-columns: 1fr 1fr; /* Dos columnas en pantallas más grandes */
+  }
+
+  .new-user-form button.create-user-button {
+    grid-column: 1 / span 2; /* El botón ocupa ambas columnas */
+  }
+}
+
+/* Ajustes para la tabla en pantallas muy pequeñas */
+@media (max-width: 600px) {
+  .users-table th,
+  .users-table td {
+    padding: 8px; /* Menos padding */
+    font-size: 0.85em; /* Fuente más pequeña */
+  }
+  .action-button {
+    padding: 6px 8px; /* Botones más pequeños */
+    font-size: 0.8em;
+  }
+}

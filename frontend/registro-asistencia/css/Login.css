@@ -1,0 +1,112 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background-color: #eef2f6; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; 
+  color: #333;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.login-box {
+  background-color: #ffffff; 
+  padding: 45px 40px; 
+  border-radius: 12px; 
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 420px; 
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.login-box:hover {
+  transform: translateY(-5px); 
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.login-title {
+  color: #0a4f94;
+  margin-bottom: 35px;
+  font-size: 2.2em; 
+  font-weight: 600;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; 
+}
+
+.input-group {
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 500; 
+  font-size: 0.95em;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid #ced4da; 
+  border-radius: 6px; 
+  color: #333;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group input::placeholder {
+  color: #a0a0a0; 
+}
+
+.input-group input:focus {
+  border-color: #007bff; 
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15); 
+}
+
+.login-button {
+  width: 100%;
+  padding: 16px;
+  background-color: #0a4f94; 
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.15em; 
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  margin-top: 15px; 
+}
+
+.login-button:hover {
+  background-color: #083c70; 
+  transform: translateY(-1px); 
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+

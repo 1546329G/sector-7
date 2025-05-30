@@ -1,0 +1,235 @@
+
+.asistencia-container {
+    padding: 50px 60px; /* Más padding para un aspecto más espacioso y premium */
+    background-color: #ffffff; /* Fondo blanco limpio */
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 8px; /* Bordes ligeramente redondeados para un toque moderno */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Sombra más suave y extendida */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente legible */
+}
+
+.asistencia-container h2 {
+    margin-top: 0;
+    margin-bottom: 40px; /* Más espacio debajo del título */
+    font-size: 2.2em; /* Título más grande y prominente */
+    color: #1a3a5e; /* Azul oscuro corporativo para el título */
+    text-align: center; /* Centramos el título */
+    font-weight: 600; /* Un poco más de peso para el título */
+    border-bottom: 1px solid #e0e0e0; /* Línea sutil debajo del título */
+    padding-bottom: 15px;
+}
+
+.filtros-asistencia {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos salten de línea en pantallas pequeñas */
+    gap: 20px; /* Espacio entre los elementos de filtro */
+    align-items: center;
+    justify-content: center; /* Centra los filtros */
+    margin-bottom: 30px; /* Espacio debajo de los filtros */
+    padding: 20px;
+    background-color: #f8fbfd; /* Fondo ligeramente diferente para los filtros */
+    border-radius: 8px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Sombra interna sutil */
+}
+
+.rango-fechas-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre los inputs de fecha y el guion */
+}
+
+.rango-fechas-group label {
+    font-weight: 500;
+    color: #34495e;
+    font-size: 0.95em;
+    margin-right: 5px; /* Espacio entre la etiqueta y el primer input */
+}
+
+.rango-fechas-group span {
+    font-size: 1.2em;
+    color: #555;
+    font-weight: bold;
+}
+
+.date-input {
+    padding: 10px 12px;
+    border: 1px solid #c0d0e0;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
+    cursor: pointer; /* Indica que es clickeable */
+}
+
+.date-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Estilos para los botones */
+.button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.05em;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    min-width: 120px; /* Ancho mínimo para los botones */
+}
+
+.primary-button {
+    background-color: #3498db; /* Azul corporativo primario */
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+.primary-button:hover {
+    background-color: #2980b9; /* Tono más oscuro de azul al pasar el ratón */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(52, 152, 219, 0.4);
+}
+
+.primary-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+}
+
+.secondary-button {
+    background-color: #6c7a89; /* Gris azulado para el botón secundario */
+    box-shadow: 0 4px 10px rgba(108, 122, 137, 0.3);
+}
+
+.secondary-button:hover {
+    background-color: #586574;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(108, 122, 137, 0.4);
+}
+
+.secondary-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(108, 122, 137, 0.3);
+}
+
+/* Estilos para la tabla de asistencia */
+.asistencia-table-container {
+    overflow-x: auto; /* Permite scroll horizontal en tablas grandes en móviles */
+    margin-top: 30px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0; /* Borde alrededor de la tabla */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra para la tabla */
+}
+
+.asistencia-table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina el espacio entre bordes de celdas */
+    min-width: 600px; /* Asegura que la tabla no sea demasiado estrecha */
+}
+
+.asistencia-table th,
+.asistencia-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0; /* Líneas divisorias más claras */
+}
+
+.asistencia-table th {
+    background-color: #eaf1f7; /* Fondo para el encabezado de la tabla */
+    color: #1a3a5e;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    border-top: 1px solid #e0e0e0;
+}
+
+.asistencia-table tbody tr:last-child td {
+    border-bottom: none; /* Elimina el borde inferior de la última fila */
+}
+
+.asistencia-table tbody tr:hover {
+    background-color: #f7fbfc; /* Resaltado al pasar el ratón por las filas */
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+    font-style: italic;
+    background-color: #fdfdfd;
+}
+
+/* Mensajes de feedback */
+.message {
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-top: 20px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid;
+}
+
+.message.info {
+    background-color: #e0f2f7; /* Azul claro */
+    color: #2196f3; /* Azul */
+    border-color: #b3e5fc;
+}
+
+.message.error {
+    background-color: #ffebee; /* Rojo claro */
+    color: #ef5350; /* Rojo */
+    border-color: #ef9a9a;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 20px;
+    color: #555;
+    font-style: italic;
+}
+
+
+/* Media queries para responsividad */
+@media (max-width: 900px) {
+    .asistencia-container {
+        padding: 30px 20px;
+    }
+
+    .filtros-asistencia {
+        flex-direction: column; /* Apila los filtros en pantallas pequeñas */
+        align-items: stretch; /* Estira los elementos para ocupar el ancho */
+    }
+
+    .rango-fechas-group {
+        flex-direction: column; /* Apila las fechas en pantallas pequeñas */
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .rango-fechas-group label {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .date-input {
+        width: 100%;
+    }
+
+    .button {
+        width: 100%; /* Botones de ancho completo */
+        min-width: unset;
+    }
+
+    .asistencia-table th,
+    .asistencia-table td {
+        padding: 10px 15px; /* Menos padding en celdas para pantallas pequeñas */
+    }
+}
+
+@media (max-width: 600px) {
+    .asistencia-container h2 {
+        font-size: 1.8em;
+    }
+}

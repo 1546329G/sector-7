@@ -1,0 +1,371 @@
+:root {
+  --color-primary-blue: #0056b3; /* Azul principal fuerte */
+  --color-secondary-blue: #007bff; /* Azul más claro para acentos */
+  --color-dark-blue: #1a3a5e; /* Azul muy oscuro para texto principal */
+  --color-light-blue-bg: #eef4f8; /* Azul muy claro para fondos sutiles */
+  --color-border-light: #c0d0e0; /* Borde azul claro */
+  --color-text-dark: #34495e; /* Texto gris azulado oscuro */
+  --color-text-medium: #5a6268; /* Texto gris medio */
+  --color-success: #28a745; /* Verde para éxito */
+  --color-error: #dc3545; /* Rojo para error */
+  --color-white: #ffffff;
+  --color-light-gray: #f8fbfd; /* Gris muy claro para inputs */
+  --color-medium-gray: #e9ecef; /* Gris medio para encabezados de tabla */
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más empresarial */
+}
+
+.administrar-usuario-container {
+  padding: 40px;
+  background-color: var(--color-light-blue-bg); /* Fondo general más claro */
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Sección de Añadir Usuario */
+.add-user-section {
+  background-color: var(--color-white);
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.add-user-title {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 2em; /* Título un poco más grande */
+  color: var(--color-dark-blue); /* Azul oscuro corporativo */
+  text-align: center; /* Centrado para un aspecto más formal */
+  font-weight: 700; /* Más negrita */
+  border-bottom: 2px solid var(--color-primary-blue); /* Línea azul fuerte */
+  padding-bottom: 15px;
+  letter-spacing: 0.5px; /* Espaciado de letras sutil */
+}
+
+.add-user-form {
+  display: grid; /* Usamos grid para un control preciso de la alineación */
+  grid-template-columns: auto 1fr; /* Una columna para la etiqueta (auto) y otra para el input (1fr) */
+  gap: 20px 25px; /* Espacio entre filas y columnas */
+  max-width: 600px; /* Ancho máximo del formulario para mantenerlo compacto y centrado */
+  margin: 0 auto; /* Centra el formulario completo horizontalmente */
+}
+
+.add-user-form .form-group {
+  /* Con display: contents, los hijos de form-group (label e input/select)
+     se convierten en ítems directos del grid del formulario. */
+  display: contents; 
+}
+
+/* Posicionamiento de etiquetas y campos dentro del grid */
+.add-user-form label {
+  grid-column: 1; /* Las etiquetas siempre en la primera columna */
+  text-align: right; /* Alineación a la derecha para las etiquetas */
+  padding-right: 20px; /* Espacio entre etiqueta y input */
+  font-weight: 600;
+  color: var(--color-text-dark);
+  white-space: nowrap;
+  font-size: 1.05em;
+}
+
+.add-user-form input[type="text"],
+.add-user-form input[type="number"],
+.add-user-form select {
+  grid-column: 2; /* Los inputs/selects siempre en la segunda columna */
+  width: 100%; /* Ocupan todo el ancho disponible en su columna */
+  padding: 12px 15px;
+  border: 1px solid var(--color-border-light); /* Borde azul claro y sutil */
+  border-radius: 6px;
+  font-size: 1em;
+  box-sizing: border-box;
+  background-color: var(--color-light-gray); /* Fondo muy claro para los campos */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+}
+
+.add-user-form input[type="text"]:focus,
+.add-user-form input[type="number"]:focus,
+.add-user-form select:focus {
+  border-color: var(--color-secondary-blue); 
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); 
+}
+
+.add-user-form select {
+  background-position: right 15px center;
+  background-size: 12px;
+  padding-right: 35px;
+}
+
+.add-user-button {
+  grid-column: 1 / span 2; 
+  justify-self: center; 
+  width: 100%; 
+  margin-top: 10px; 
+  padding: 14px 30px;
+  background-color: var(--color-primary-blue);
+  color: var(--color-white);
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3);
+  min-width: unset;
+}
+
+.add-user-button:hover {
+  background-color: var(--color-secondary-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 86, 179, 0.4);
+}
+
+.add-user-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 86, 179, 0.3);
+}
+
+.add-message {
+  grid-column: 1 / span 2; 
+  text-align: center;
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.95em;
+  font-weight: 500;
+}
+
+.add-message.success {
+  color: var(--color-success);
+  background-color: #e6ffed;
+  border: 1px solid #b3e0b3;
+}
+
+.add-message.error {
+  color: var(--color-error);
+  background-color: #ffe6e6;
+  border: 1px solid #e0b3b3;
+}
+
+.search-table-section {
+  background-color: var(--color-white);
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.table-title {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 2em;
+  color: var(--color-dark-blue);
+  text-align: center;
+  font-weight: 700;
+  border-bottom: 2px solid var(--color-primary-blue);
+  padding-bottom: 15px;
+  letter-spacing: 0.5px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.search-bar label {
+  font-weight: 600;
+  color: var(--color-text-dark);
+  white-space: nowrap;
+  font-size: 1.05em;
+}
+
+.search-bar input[type="text"] {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px;
+  font-size: 1em;
+  box-sizing: border-box;
+  background-color: var(--color-light-gray);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+  max-width: 350px;
+}
+
+.search-bar input[type="text"]:focus {
+  border-color: var(--color-secondary-blue);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.search-button {
+  padding: 12px 25px;
+  background-color: var(--color-text-medium);
+  color: var(--color-white);
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-button:hover {
+  background-color: #495057;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.user-table-container {
+  overflow-x: auto;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.user-table th,
+.user-table td {
+  border: 1px solid #e0e0e0;
+  padding: 14px 18px;
+  text-align: left;
+  font-size: 0.95em;
+}
+
+.user-table th {
+  background-color: var(--color-medium-gray);
+  color: var(--color-dark-blue);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-table tbody tr:nth-child(even) {
+  background-color: var(--color-light-gray);
+}
+
+.user-table tbody tr:hover {
+  background-color: #e0f0f8;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: var(--color-white);
+  display: inline-block;
+}
+
+.status-active {
+  background-color: var(--color-success);
+}
+
+.status-inactive {
+  background-color: var(--color-error);
+}
+
+
+.toggle-status-button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-status-button.status-active {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+.toggle-status-button.status-inactive {
+  background-color: var(--color-success);
+  color: var(--color-white);
+}
+
+.toggle-status-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.loading-message, .error-message {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.1em;
+  color: var(--color-text-medium);
+}
+
+.error-message {
+  color: var(--color-error);
+  font-weight: bold;
+}
+
+
+@media (max-width: 992px) {
+  .add-user-form {
+    max-width: 500px;
+  }
+ 
+  .add-user-form label {
+    text-align: left; 
+    padding-right: 0;
+  }
+  .add-user-button {
+    grid-column: 1 / span 2;
+    justify-self: center; 
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .administrar-usuario-container {
+    padding: 20px;
+  }
+
+  .add-user-title, .table-title {
+    font-size: 1.6em;
+    padding-bottom: 10px;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .search-bar input[type="text"] {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .add-user-section, .search-table-section {
+    padding: 20px;
+  }
+
+  .add-user-form {
+    gap: 15px;
+  }
+
+  .user-table th, .user-table td {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+
+  .toggle-status-button {
+    padding: 6px 10px;
+    font-size: 0.8em;
+  }
+}
