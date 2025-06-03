@@ -1,12 +1,23 @@
 // backend/server.js
-const appApi1 = require('./api1/app');
-const appApi3 = require('./api3/src/app'); 
 
-const portApi1 = process.env.PORT_API1 || 3001; // Puerto para la API de Profesores/Asistencias
-const portApi3 = process.env.PORT_API3 || 3000; // Puerto para la API de Autenticación
+// 1. Cargar dotenv al inicio para que process.env esté disponible
+//    'dotenv/config' es el método recomendado para ES Modules
+import 'dotenv/config';
 
+// 2. Importar tus aplicaciones de Express
+import appApi1 from './api1/app.js';
+import appApi3 from './api3/src/app.js';
 
+// 3. Obtener los puertos de las variables de entorno
+//    Asegúrate de que los nombres en tu .env coincidan con lo que buscas aquí.
+//    Tu .env actual tiene 'PORT=5009', no PORT_API1 ni PORT_API3.
+//    Si quieres puertos separados para cada API, deberías definirlos así en tu .env:
+//    PORT_API1=5009
+//    PORT_API3=5010
+//    Si solo tienes PORT=5009, entonces ambas APIs intentarán usar 5009 si no usas fallbacks diferentes.
 
+const portApi1 = process.env.PORT_API1 || process.env.PORT || 5009; // Intenta PORT_API1, luego PORT, luego 6001
+const portApi3 = process.env.PORT_API3 || 5010; // Intenta PORT_API3, luego 6000
 
 //-----------------------------------
 //-----------------------------------
@@ -55,6 +66,5 @@ appApi3.listen(portApi3, () => {
 
 process.on('SIGINT', () => {
     console.log('\n[Servidor Principal] Señal SIGINT recibida. Apagando servidores...');
-  
     process.exit(0);
 });

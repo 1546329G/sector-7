@@ -1,4 +1,6 @@
-const { pool } = require('../config/db'); // Asumo que tienes una conexión a la DB aquí
+const { pool } = require('../config/db');
+const { pool } = require('../../../db');
+ // Asumo que tienes una conexión a la DB aquí
 const bcrypt = require('bcryptjs');
 
 class User {

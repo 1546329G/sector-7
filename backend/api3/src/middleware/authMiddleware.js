@@ -1,4 +1,7 @@
-const { verifyToken } = require('../utils/jwt'); // Asegúrate de que esta ruta sea correcta
+// backend/api3/src/middleware/authMiddleware.js (CONVERTIDO A ES MODULES)
+
+// CAMBIO: Usar import en lugar de require
+import { verifyToken } from '../utils/jwt.js'; // <-- Asegúrate de que esta ruta sea correcta y añade .js
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -9,6 +12,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ message: 'Token no proporcionado. Acceso denegado.' });
   }
 
+  // Asegúrate de que verifyToken maneje errores o devuelva null/false si es inválido
   const decoded = verifyToken(token);
   if (!decoded) {
     return res.status(403).json({ message: 'Token inválido o expirado. Acceso denegado.' });
@@ -18,4 +22,5 @@ const authenticateToken = (req, res, next) => {
   next();
 };
 
-module.exports = authenticateToken;
+// CAMBIO: Usar export default en lugar de module.exports
+export default authenticateToken;

@@ -1,13 +1,12 @@
-
-
 {
   "name": "autenticacion",
   "version": "1.0.0",
   "description": "API de autenticación de login con Node.js y Express",
-  "main": "server.js",
+  "main": "src/app.js", 
+  "type": "module",     
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
   },
   "keywords": [
     "auth",

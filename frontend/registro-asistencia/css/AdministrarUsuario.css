@@ -1,3 +1,4 @@
+/* Variables CSS - Mantener estas para consistencia */
 :root {
   --color-primary-blue: #0056b3; /* Azul principal fuerte */
   --color-secondary-blue: #007bff; /* Azul más claro para acentos */
@@ -17,25 +18,61 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más empresarial */
 }
 
-.administrar-usuario-container {
+/* Contenedor principal de la página de Gestión de Docentes */
+.gestion-docente-page-container {
   padding: 40px;
   background-color: var(--color-light-blue-bg); /* Fondo general más claro */
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px); /* Ajusta la altura para que no se superponga con headers/footers */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 30px; /* Espacio entre secciones */
 }
 
-/* Sección de Añadir Usuario */
-.add-user-section {
+.main-page-title {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 2.5em; /* Título principal más grande */
+  color: var(--color-dark-blue);
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Mensajes de retroalimentación a nivel de página (éxito/error) */
+.page-feedback-message {
+  text-align: center;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.page-feedback-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.page-feedback-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+
+/* Sección de Añadir Docente */
+.generar-docente-container {
   background-color: var(--color-white);
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
-.add-user-title {
+.generar-docente-title {
   margin-top: 0;
   margin-bottom: 30px;
   font-size: 2em; /* Título un poco más grande */
@@ -47,7 +84,7 @@ body {
   letter-spacing: 0.5px; /* Espaciado de letras sutil */
 }
 
-.add-user-form {
+.generar-docente-form {
   display: grid; /* Usamos grid para un control preciso de la alineación */
   grid-template-columns: auto 1fr; /* Una columna para la etiqueta (auto) y otra para el input (1fr) */
   gap: 20px 25px; /* Espacio entre filas y columnas */
@@ -55,14 +92,14 @@ body {
   margin: 0 auto; /* Centra el formulario completo horizontalmente */
 }
 
-.add-user-form .form-group {
+.generar-docente-form .form-group {
   /* Con display: contents, los hijos de form-group (label e input/select)
      se convierten en ítems directos del grid del formulario. */
   display: contents; 
 }
 
 /* Posicionamiento de etiquetas y campos dentro del grid */
-.add-user-form label {
+.generar-docente-form label {
   grid-column: 1; /* Las etiquetas siempre en la primera columna */
   text-align: right; /* Alineación a la derecha para las etiquetas */
   padding-right: 20px; /* Espacio entre etiqueta y input */
@@ -72,9 +109,9 @@ body {
   font-size: 1.05em;
 }
 
-.add-user-form input[type="text"],
-.add-user-form input[type="number"],
-.add-user-form select {
+.generar-docente-form input[type="text"],
+.generar-docente-form input[type="number"],
+.generar-docente-form select {
   grid-column: 2; /* Los inputs/selects siempre en la segunda columna */
   width: 100%; /* Ocupan todo el ancho disponible en su columna */
   padding: 12px 15px;
@@ -87,24 +124,26 @@ body {
   outline: none;
 }
 
-.add-user-form input[type="text"]:focus,
-.add-user-form input[type="number"]:focus,
-.add-user-form select:focus {
+.generar-docente-form input[type="text"]:focus,
+.generar-docente-form input[type="number"]:focus,
+.generar-docente-form select:focus {
   border-color: var(--color-secondary-blue); 
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); 
 }
 
-.add-user-form select {
-  background-position: right 15px center;
-  background-size: 12px;
-  padding-right: 35px;
+.generar-docente-form select {
+  /* Elimina background-image si no necesitas el icono de flecha personalizado */
+  /* background-position: right 15px center; */
+  /* background-size: 12px; */
+  padding-right: 15px; /* Ajusta este si no hay icono */
 }
 
-.add-user-button {
-  grid-column: 1 / span 2; 
-  justify-self: center; 
-  width: 100%; 
-  margin-top: 10px; 
+.add-docente-button {
+  grid-column: 1 / span 2; /* El botón ocupa ambas columnas */
+  justify-self: center; /* Centra el botón horizontalmente */
+  width: 100%; /* Ocupa el ancho completo de las dos columnas */
+  max-width: 300px; /* Limita el ancho máximo para que no sea demasiado largo */
+  margin-top: 10px; /* Espacio superior */
   padding: 14px 30px;
   background-color: var(--color-primary-blue);
   color: var(--color-white);
@@ -115,22 +154,30 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3);
-  min-width: unset;
+  min-width: unset; /* Reinicia cualquier min-width heredado */
 }
 
-.add-user-button:hover {
+.add-docente-button:hover {
   background-color: var(--color-secondary-blue);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 86, 179, 0.4);
 }
 
-.add-user-button:active {
+.add-docente-button:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(0, 86, 179, 0.3);
 }
 
-.add-message {
-  grid-column: 1 / span 2; 
+.add-docente-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+
+.add-docente-message {
+  grid-column: 1 / span 2; /* Ocupa ambas columnas en el grid del formulario */
   text-align: center;
   margin-top: 15px;
   padding: 10px;
@@ -139,26 +186,27 @@ body {
   font-weight: 500;
 }
 
-.add-message.success {
+.add-docente-message.success {
   color: var(--color-success);
   background-color: #e6ffed;
   border: 1px solid #b3e0b3;
 }
 
-.add-message.error {
+.add-docente-message.error {
   color: var(--color-error);
   background-color: #ffe6e6;
   border: 1px solid #e0b3b3;
 }
 
-.search-table-section {
+/* Sección de Administrar Docentes (Tabla) */
+.administrar-docente-container {
   background-color: var(--color-white);
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
-.table-title {
+.administrar-docente-title {
   margin-top: 0;
   margin-bottom: 30px;
   font-size: 2em;
@@ -170,41 +218,9 @@ body {
   letter-spacing: 0.5px;
 }
 
-.search-bar {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.search-bar label {
-  font-weight: 600;
-  color: var(--color-text-dark);
-  white-space: nowrap;
-  font-size: 1.05em;
-}
-
-.search-bar input[type="text"] {
-  flex-grow: 1;
-  padding: 12px 15px;
-  border: 1px solid var(--color-border-light);
-  border-radius: 6px;
-  font-size: 1em;
-  box-sizing: border-box;
-  background-color: var(--color-light-gray);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  outline: none;
-  max-width: 350px;
-}
-
-.search-bar input[type="text"]:focus {
-  border-color: var(--color-secondary-blue);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-}
-
-.search-button {
+.refresh-button {
   padding: 12px 25px;
-  background-color: var(--color-text-medium);
+  background-color: var(--color-secondary-blue); /* Color más brillante para recargar */
   color: var(--color-white);
   border: none;
   border-radius: 6px;
@@ -212,67 +228,82 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+  display: block; /* Para que ocupe su propia línea y se pueda centrar */
+  margin: 0 auto 30px auto; /* Centra el botón y le da margen inferior */
 }
 
-.search-button:hover {
-  background-color: #495057;
+.refresh-button:hover {
+  background-color: var(--color-primary-blue);
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
 
-.user-table-container {
+.refresh-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+
+.docentes-table-container { /* Un contenedor para la tabla si necesitas overflow-x */
   overflow-x: auto;
 }
 
-.user-table {
+.docentes-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse; /* Elimina los espacios entre celdas */
   margin-top: 20px;
 }
 
-.user-table th,
-.user-table td {
-  border: 1px solid #e0e0e0;
+.docentes-table th,
+.docentes-table td {
+  border: 1px solid #e0e0e0; /* Borde de celda suave */
   padding: 14px 18px;
   text-align: left;
   font-size: 0.95em;
+  vertical-align: middle; /* Alineación vertical para contenido de celda */
 }
 
-.user-table th {
-  background-color: var(--color-medium-gray);
+.docentes-table th {
+  background-color: var(--color-medium-gray); /* Fondo gris para encabezados */
   color: var(--color-dark-blue);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap; /* Evita que los encabezados de columna se envuelvan */
 }
 
-.user-table tbody tr:nth-child(even) {
-  background-color: var(--color-light-gray);
+.docentes-table tbody tr:nth-child(even) {
+  background-color: var(--color-light-gray); /* Rayas en la tabla */
 }
 
-.user-table tbody tr:hover {
-  background-color: #e0f0f8;
+.docentes-table tbody tr:hover {
+  background-color: #e0f0f8; /* Efecto hover sutil */
 }
 
-.status-badge {
+/* Estilos para el "badge" de estado */
+.estado-badge {
   padding: 5px 10px;
-  border-radius: 15px;
+  border-radius: 15px; /* Bordes redondeados para parecer un badge */
   font-size: 0.85em;
   font-weight: bold;
   color: var(--color-white);
-  display: inline-block;
+  display: inline-block; /* Asegura que el padding funcione */
+  text-align: center;
+  min-width: 70px; /* Ancho mínimo para consistencia */
 }
 
-.status-active {
+.estado-activo {
   background-color: var(--color-success);
 }
 
-.status-inactive {
+.estado-inactivo {
   background-color: var(--color-error);
 }
 
-
+/* Botón para cambiar estado (Activar/Desactivar) */
 .toggle-status-button {
   padding: 8px 12px;
   border: none;
@@ -282,14 +313,15 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Evita que el texto del botón se envuelva */
 }
 
-.toggle-status-button.status-active {
+.toggle-status-button.activo { /* Cuando el estado actual es Activo, el botón es para Desactivar (rojo) */
   background-color: var(--color-error);
   color: var(--color-white);
 }
 
-.toggle-status-button.status-inactive {
+.toggle-status-button.inactivo { /* Cuando el estado actual es Inactivo, el botón es para Activar (verde) */
   background-color: var(--color-success);
   color: var(--color-white);
 }
@@ -311,34 +343,38 @@ body {
   font-weight: bold;
 }
 
-
+/* Media Queries para Responsive Design */
 @media (max-width: 992px) {
-  .add-user-form {
-    max-width: 500px;
+  .generar-docente-form {
+    grid-template-columns: 1fr; /* Una sola columna para formularios más pequeños */
+    max-width: 450px;
   }
- 
-  .add-user-form label {
-    text-align: left; 
+  
+  .generar-docente-form .form-group {
+    display: block; /* Restaura el comportamiento de bloque para los grupos */
+  }
+
+  .generar-docente-form label {
+    text-align: left; /* Alineación a la izquierda */
     padding-right: 0;
+    margin-bottom: 5px; /* Espacio entre label y input */
+    display: block; /* Asegura que la label esté en su propia línea */
   }
-  .add-user-button {
-    grid-column: 1 / span 2;
-    justify-self: center; 
+
+  .generar-docente-form input[type="text"],
+  .generar-docente-form input[type="number"],
+  .generar-docente-form select {
+    grid-column: unset; /* Reinicia la columna del grid */
     width: 100%;
   }
-}
 
-@media (max-width: 768px) {
-  .administrar-usuario-container {
-    padding: 20px;
+  .add-docente-button {
+    grid-column: unset; /* Reinicia la columna del grid */
+    max-width: 100%; /* Ocupa todo el ancho disponible */
   }
 
-  .add-user-title, .table-title {
-    font-size: 1.6em;
-    padding-bottom: 10px;
-  }
-
-  .search-bar {
+  /* Si había una barra de búsqueda que no está en este componente, ignórala */
+  /* .search-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
@@ -347,25 +383,57 @@ body {
   .search-bar input[type="text"] {
     width: 100%;
     max-width: none;
-  }
+  } */
 }
 
-@media (max-width: 576px) {
-  .add-user-section, .search-table-section {
+@media (max-width: 768px) {
+  .gestion-docente-page-container {
     padding: 20px;
   }
 
-  .add-user-form {
-    gap: 15px;
+  .main-page-title, .generar-docente-title, .administrar-docente-title {
+    font-size: 1.8em;
+    padding-bottom: 10px;
   }
 
-  .user-table th, .user-table td {
+  .generar-docente-container, .administrar-docente-container {
+    padding: 20px;
+  }
+
+  .docentes-table th, .docentes-table td {
     padding: 10px 12px;
-    font-size: 0.9em;
+    font-size: 0.85em;
   }
 
   .toggle-status-button {
     padding: 6px 10px;
+    font-size: 0.75em;
+  }
+}
+
+@media (max-width: 576px) {
+  .main-page-title, .generar-docente-title, .administrar-docente-title {
+    font-size: 1.5em;
+  }
+
+  .generar-docente-container, .administrar-docente-container {
+    padding: 15px;
+  }
+
+  /* Ajustes para tabla pequeña */
+  .docentes-table th, .docentes-table td {
+    padding: 8px 10px;
     font-size: 0.8em;
+  }
+
+  .estado-badge {
+    padding: 3px 8px;
+    font-size: 0.7em;
+    min-width: 60px;
+  }
+
+  .toggle-status-button {
+    padding: 5px 8px;
+    font-size: 0.7em;
   }
 }

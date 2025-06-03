@@ -1,6 +1,9 @@
-const express = require('express');
-const { registerUser, loginUser } = require('../controllers/authController');
-const authenticateToken = require('../middleware/authMiddleware'); // Importa el middleware de autenticación
+// backend/api3/src/routes/authRoutes.js (CORREGIDO A ES MODULES COMPLETAMENTE)
+
+import express from 'express'; // <-- CAMBIO: Usar import
+import { getDatabasePool } from '../../../db.js'; // <-- CORRECCIÓN CLAVE DE LA RUTA Y SINTAXIS
+import { registerUser, loginUser } from '../controllers/authController.js'; // <-- CAMBIO: Usar import y añadir .js
+import authenticateToken from '../middleware/authMiddleware.js'; // <-- CAMBIO: Usar import y añadir .js (asumo que exporta default)
 
 const router = express.Router();
 
@@ -16,4 +19,4 @@ router.get('/protected', authenticateToken, (req, res) => {
   res.json({ message: `¡Acceso concedido para ${req.user.username}! Estos son datos muy secretos.` });
 });
 
-module.exports = router;
+export default router; // <-- CAMBIO: Usar export default

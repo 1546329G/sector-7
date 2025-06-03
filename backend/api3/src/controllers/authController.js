@@ -1,51 +1,53 @@
-// controllers/authController.js
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const { generateToken } = require('../utils/jwt');
+// backend/api3/src/controllers/authController.js (CONVERTIDO A ES MODULES)
 
-const registerUser = async (req, res) => {
-  const { username, password, rol } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Se requiere nombre de usuario y contraseña.' });
-  }
+import bcrypt from 'bcryptjs'; // <-- CAMBIO: Usar import
+// Importante: La ruta de User.js. Necesitas subir dos niveles desde controllers/ a api3/src/, luego al models/
+// La ruta más probable para models/User.js desde controllers/ es ../models/User.js
+import User from '../models/User.js'; // <-- CAMBIO: Usar import y añadir .js. Asumiendo export default de User.js
+import { generateToken } from '../utils/jwt.js'; // <-- CAMBIO: Usar import y añadir .js
 
-  try {
-    // 1. Verificar si el usuario ya existe
-    const existingUser = await User.findByUsername(username);
-    if (existingUser) {
-      return res.status(409).json({ message: 'El nombre de usuario ya existe.' });
-    }
+// --- FUNCIÓN registerUser ---
+export const registerUser = async (req, res) => { // <-- CAMBIO: Añadir 'export const'
+  const { username, password, rol } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Se requiere nombre de usuario y contraseña.' });
+  }
 
-    // 2. Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    // 1. Verificar si el usuario ya existe
+    const existingUser = await User.findByUsername(username); // Asegúrate de que User.findByUsername sea asíncrono
+    if (existingUser) {
+      return res.status(409).json({ message: 'El nombre de usuario ya existe.' });
+    }
 
-    // 3. Crear el nuevo usuario en la DB
-    // La función create ahora puede devolver un objeto con el ID si quieres usarlo, aunque no es estrictamente necesario para este endpoint.
-    await User.create(username, hashedPassword, rol); // Asegúrate de pasar 'rol'
-    // Si User.create falla (ej. por un problema en la DB), el catch de este bloque lo atrapará
+    // 2. Hashear la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    res.status(201).json({ message: 'Usuario registrado exitosamente.' });
-  } catch (error) {
-    console.error('Error en el registro de usuario (controlador):', error); // Mensaje más específico
-    // Verifica si el error es de una entrada duplicada (ej. si el findByUsername no lo atrapó por alguna razón de concurrencia)
-    if (error.code === 'ER_DUP_ENTRY') { // Código de error de MySQL/MariaDB para entrada duplicada
+    // 3. Crear el nuevo usuario en la DB
+    await User.create(username, hashedPassword, rol); // Asegúrate de que User.create sea asíncrono y reciba 'rol'
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente.' });
+  } catch (error) {
+    console.error('Error en el registro de usuario (controlador):', error);
+    if (error.code === 'ER_DUP_ENTRY') {
         return res.status(409).json({ message: 'El nombre de usuario ya existe.' });
     }
-    res.status(500).json({ message: 'Error en el servidor al registrar el usuario.', error: error.message }); // Devuelve el mensaje de error real
-  }
+    res.status(500).json({ message: 'Error en el servidor al registrar el usuario.', error: error.message });
+  }
 };
 
 
-const loginUser = async (req, res) => {
+// --- FUNCIÓN loginUser ---
+export const loginUser = async (req, res) => { // <-- CAMBIO: Añadir 'export const'
     const { username, password } = req.body;
 
     console.log('--- INTENTO DE LOGIN ---');
     console.log('Username recibido:', username);
-    console.log('Password recibido (plano):', password); // <-- Para depuración, ¡elimina en producción!
+    // console.log('Password recibido (plano):', password); // <-- Para depuración, ¡elimina en producción!
 
     try {
         // 1. Buscar al usuario en la DB
-        const user = await User.findByUsername(username);
+        const user = await User.findByUsername(username); // Asegúrate de que User.findByUsername sea asíncrono
         console.log('Usuario encontrado en DB:', user ? user.username : 'Ninguno');
 
         if (!user) {
@@ -72,7 +74,9 @@ const loginUser = async (req, res) => {
         res.status(500).json({ message: 'Error en el servidor al iniciar sesión.' });
     }
 };
-module.exports = {
-  registerUser,
-  loginUser,
-};
+
+// <-- REMUEVE LA SIGUIENTE EXPORTACIÓN COMMONJS:
+// module.exports = {
+//   registerUser,
+//   loginUser,
+// };
