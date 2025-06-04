@@ -14,7 +14,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
 
   // Configuración para entorno local
-  const API_AUTH_BASE_URL = 'http://localhost:5009/api/auth'; // Ajusta el puerto según tu backend local
+  const API_AUTH_BASE_URL = 'http://localhost:5010/api/auth'; // Ajusta el puerto según tu backend local
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
