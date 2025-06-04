@@ -1,28 +1,24 @@
-// backend/api3/src/utils/jwt.js (CONVERTED TO ES MODULES)
+// api3/src/utils/jwt.js
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-import jwt from 'jsonwebtoken'; // <-- CHANGE: Use import instead of require
-import 'dotenv/config'; // <-- IMPORTANT: Add this to load .env variables if not loaded elsewhere before this module.
-                        //               Alternatively, you might need to import dotenv and call dotenv.config()
-                        //               if this file runs before your main server.js has loaded it.
-                        //               For simplicity, assuming 'dotenv/config' is fine.
+dotenv.config({ path: '../../.env' }); // Adjust path if .env is not in api3 root, but in your project root
 
-export const generateToken = (payload) => { // <-- CHANGE: Add 'export const'
-  // Usa process.env.JWT_SECRET para obtener el secreto del .env
-  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('FATAL ERROR: JWT_SECRET no está definido en las variables de entorno.');
+    process.exit(1); // Exit if secret is not set, as security is compromised
+}
+
+export const generateToken = (payload) => {
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }); // Token expires in 1 hour
 };
 
-export const verifyToken = (token) => { // <-- CHANGE: Add 'export const'
-  try {
-    // Usa process.env.JWT_SECRET para obtener el secreto del .env
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch (error) {
-    // console.error("Error al verificar token:", error.message); // Optional for debugging
-    return null; // Token inválido o expirado
-  }
+export const verifyToken = (token) => {
+    try {
+        return jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+        // console.error('Error verifying token:', error.message);
+        return null; // Return null if token is invalid or expired
+    }
 };
-
-// <-- REMOVE THE FOLLOWING COMMONJS EXPORT:
-// module.exports = {
-//   generateToken,
-//   verifyToken,
-// };

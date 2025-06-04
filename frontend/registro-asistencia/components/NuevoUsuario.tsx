@@ -1,99 +1,45 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../css/NuevoUsuario.css'; // Asegúrate de que este archivo CSS exista
+import '../css/NuevoUsuario.css'; // Asegúrate de que esta ruta sea correcta y el archivo exista
 
-// --- Interfaces actualizadas para reflejar la tabla de MariaDB ---
+// --- Interfaces para los datos de usuario (deben coincidir con tu DB/API) ---
 interface User {
-    id: string; // Coincide con 'id' de la DB (VARCHAR o INT si es auto_increment)
+    id: string; // O number, si tu ID en la DB es numérico
     username: string;
-    rol: 'usuario' | 'reportes' | 'docente' | 'admin'; // Roles definidos en tu API
-    activo: boolean; // Estado activo/inactivo (BOOLEAN o TINYINT(1) en DB)
-    creado_en: string; // Timestamp de creación (datetime o timestamp en DB)
-    actualizado_en: string; // Timestamp de última actualización (datetime o timestamp en DB)
+    rol: 'usuario' | 'reportes' | 'docente' | 'admin'; // Roles que manejas
+    activo: boolean; // Estado activo/inactivo
+    creado_en: string; // Fecha de creación (ISO string)
+    actualizado_en: string; // Fecha de última actualización (ISO string)
 }
 
 const GestionUsuarios: React.FC = () => {
-    // Estados para el formulario de nuevo usuario
+    // --- Estados para el formulario de nuevo usuario ---
     const [newUsername, setNewUsername] = useState<string>('');
     const [newPassword, setNewPassword] = useState<string>('');
-    const [newRole, setNewRole] = useState<User['rol']>('usuario'); // Rol por defecto para nuevos usuarios
+    const [newRole, setNewRole] = useState<User['rol']>('usuario'); // Rol por defecto
 
-    // Estados para la tabla de usuarios
-    // ¡AHORA INICIALIZADO COMO ARRAY VACÍO!
+    // --- Estados para la tabla de usuarios ---
     const [users, setUsers] = useState<User[]>([]);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [editingUser, setEditingUser] = useState<User | null>(null); // Usuario que se está editando
     const [editUsername, setEditUsername] = useState<string>('');
     const [editRole, setEditRole] = useState<User['rol']>('usuario');
     const [editActivo, setEditActivo] = useState<boolean>(false);
 
-    // Estados de carga y mensajes
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false);
-    const [isEditingSubmitting, setIsEditingSubmitting] = useState<boolean>(false);
+    // --- Estados de UI/mensajes ---
+    const [isLoading, setIsLoading] = useState<boolean>(true); // Carga inicial de usuarios
+    const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false); // Envío del formulario de creación
+    const [isEditingSubmitting, setIsEditingSubmitting] = useState<boolean>(false); // Envío del formulario de edición
     const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
 
-    // --- URLs de tu API Backend ---
-    const API_AUTH_URL = 'http://localhost:5009/api/auth'; // Endpoint para autenticación/registro
-    const API_USERS_URL = 'http://localhost:5009/api/users'; // Endpoint para gestión de usuarios (CRUD)
+    // --- URLs de tu API Backend (confirmado que usa el puerto 5010) ---
+    const API_AUTH_URL = 'http://localhost:5010/api/auth';
+    const API_USERS_URL = 'http://localhost:5010/api/users';
 
-    // Función para obtener el token JWT del localStorage
+    // --- Función para obtener el token JWT del localStorage ---
     const getToken = useCallback(() => {
-        return localStorage.getItem('jwt_token'); // Asegúrate de que así guardas tu token después del login
+        return localStorage.getItem('jwt_token');
     }, []);
 
-    // Función para cargar usuarios desde el backend
-    const fetchUsers = useCallback(async () => {
-        setIsLoading(true);
-        setMessage(null);
-        const token = getToken();
-
-        if (!token) {
-            setMessage({ type: 'error', text: 'No estás autenticado. Por favor, inicia sesión para ver los usuarios.' });
-            setIsLoading(false);
-            // Aquí podrías redirigir al login si es necesario, por ejemplo con useHistory de react-router-dom
-            // history.push('/login'); 
-            return;
-        }
-
-        try {
-            // Esta petición requiere que tengas el endpoint GET /api/users implementado en tu API
-            const response = await fetch(API_USERS_URL, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Envía el token para rutas protegidas
-                },
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al cargar usuarios');
-            }
-
-            const data: User[] = await response.json();
-            // Asegurarse de que 'activo' sea booleano si la API lo devuelve como 0/1
-            const formattedUsers = data.map(user => ({
-                ...user,
-                activo: Boolean(user.activo)
-            }));
-            setUsers(formattedUsers);
-            setMessage({ type: 'success', text: `Usuarios cargados: ${formattedUsers.length}` });
-
-        } catch (error: any) {
-            console.error('Error al cargar usuarios:', error);
-            setMessage({ type: 'error', text: error.message || 'Error al cargar usuarios. Asegúrate de que tu API tiene el endpoint /api/users y estás autenticado con un rol permitido (ej. admin).' });
-            setUsers([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [getToken, API_USERS_URL]);
-
-    // Cargar usuarios al montar el componente
-    // Se ejecuta una vez al inicio. fetchUsers se useCallback, por lo que esta dependencia no causará re-renders innecesarios.
-    useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers]);
-
-    // Manejador para crear un nuevo usuario (ahora enviando a tu API real)
+    // --- Manejador para crear un nuevo usuario ---
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
@@ -104,12 +50,9 @@ const GestionUsuarios: React.FC = () => {
             setIsFormSubmitting(false);
             return;
         }
-        
-        // El endpoint /api/auth/register de tu API no necesita un token
-        // para el registro inicial, según tu código de backend.
-        // Si tu authMiddleware lo protege, necesitarías un token aquí (lo cual sería inusual para un registro).
 
         try {
+            // Este endpoint de registro NO DEBE requerir autenticación en tu API.
             const response = await fetch(`${API_AUTH_URL}/register`, {
                 method: 'POST',
                 headers: {
@@ -117,36 +60,38 @@ const GestionUsuarios: React.FC = () => {
                 },
                 body: JSON.stringify({
                     username: newUsername,
-                    password: newPassword, // La contraseña se envía en texto plano, tu API la hashea
-                    rol: newRole, // Envía el rol seleccionado
+                    password: newPassword,
+                    rol: newRole,
                 }),
             });
 
-            const data = await response.json(); // Lee la respuesta (message)
+            const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(data.message || 'Error al crear usuario.');
             }
 
-            setMessage({ type: 'success', text: data.message || `Usuario '${newUsername}' creado exitosamente en la base de datos.` });
+            setMessage({ type: 'success', text: data.message || `Usuario '${newUsername}' creado exitosamente.` });
 
-            // Una vez creado en la base de datos, ¡recargar la lista de usuarios para que se muestre!
+            // Después de crear, recargamos la lista de usuarios.
+            // Esta llamada a fetchUsers() requerirá que el usuario actual esté logueado
+            // con los permisos adecuados para ver la lista.
             fetchUsers();
 
             // Limpiar el formulario
             setNewUsername('');
             setNewPassword('');
-            setNewRole('usuario'); // Resetear el rol a su valor por defecto
+            setNewRole('usuario');
 
         } catch (error: any) {
             console.error('Error al crear usuario:', error);
-            setMessage({ type: 'error', text: error.message || 'Error al crear usuario. Inténtalo de nuevo.' });
+            setMessage({ type: 'error', text: error.message || 'Error al crear usuario. Asegúrate de que tu API está disponible en /api/auth/register.' });
         } finally {
             setIsFormSubmitting(false);
         }
     };
 
-    // Manejador para iniciar la edición
+    // --- Manejador para iniciar el modo de edición ---
     const handleEdit = (user: User) => {
         setEditingUser(user);
         setEditUsername(user.username);
@@ -155,7 +100,7 @@ const GestionUsuarios: React.FC = () => {
         setMessage(null);
     };
 
-    // Manejador para guardar cambios de edición
+    // --- Manejador para guardar los cambios de un usuario editado ---
     const handleSaveEdit = async (e: React.FormEvent) => {
         e.preventDefault();
         setMessage(null);
@@ -170,66 +115,61 @@ const GestionUsuarios: React.FC = () => {
         }
 
         try {
-            // Esta petición requiere que tengas el endpoint PUT /api/users/:id implementado en tu API
+            // Este endpoint PUT /api/users/:id requiere autenticación y autorización
             const response = await fetch(`${API_USERS_URL}/${editingUser.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` // Envía el token
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     username: editUsername,
                     rol: editRole,
                     activo: editActivo,
-                    // No se envía la contraseña aquí, se asume que se gestiona aparte
+                    // No se envía la contraseña aquí
                 }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Error al actualizar usuario');
+                throw new Error(data.message || 'Error al actualizar usuario.');
             }
 
-            // Si tu API devuelve el usuario actualizado, úsalo.
-            // Si solo devuelve un mensaje, recarga fetchUsers()
-            // Aquí asumo que tu API devuelve un objeto 'user' actualizado
-            const updatedUser: User = {
-                ...editingUser, // Mantener campos como 'creado_en'
-                id: data.user.id, // Asegurarse de que el ID es correcto
-                username: data.user.username,
-                rol: data.user.rol,
-                activo: Boolean(data.user.activo), // Asegura que sea booleano
-                actualizado_en: data.user.actualizado_en, // Usa el timestamp de la DB
-            };
-
+            // Actualiza el estado local de los usuarios
             setUsers(prevUsers =>
-                prevUsers.map(user => (user.id === updatedUser.id ? updatedUser : user))
+                prevUsers.map(user => (user.id === editingUser.id ? {
+                    ...user,
+                    username: editUsername,
+                    rol: editRole,
+                    activo: editActivo,
+                    actualizado_en: data.user?.actualizado_en || new Date().toISOString() // Usa el timestamp de la API si lo devuelve
+                } : user))
             );
-            setMessage({ type: 'success', text: data.message || `Usuario '${updatedUser.username}' actualizado.` });
+            setMessage({ type: 'success', text: data.message || `Usuario '${editUsername}' actualizado.` });
             setEditingUser(null); // Salir del modo edición
         } catch (error: any) {
             console.error('Error al guardar edición:', error);
-            setMessage({ type: 'error', text: error.message || 'Error al actualizar usuario. Asegúrate de que tu API tiene el endpoint PUT /api/users/:id' });
+            setMessage({ type: 'error', text: error.message || 'Error al actualizar usuario. Asegúrate de que tu API tiene el endpoint PUT /api/users/:id.' });
         } finally {
             setIsEditingSubmitting(false);
         }
     };
 
-    // Manejador para cancelar la edición
+    // --- Manejador para cancelar el modo de edición ---
     const handleCancelEdit = () => {
         setEditingUser(null);
         setMessage(null);
     };
 
-    // Manejador para eliminar un usuario
+    // --- Manejador para eliminar un usuario ---
     const handleDelete = async (userId: string, username: string) => {
         if (!window.confirm(`¿Estás seguro de que quieres eliminar a '${username}'? Esta acción es irreversible.`)) {
             return;
         }
 
         setMessage(null);
-        setIsLoading(true); // Puedes poner un loading más específico si prefieres
+        setIsLoading(true); // Poner loading general durante la eliminación
         const token = getToken();
 
         if (!token) {
@@ -239,7 +179,7 @@ const GestionUsuarios: React.FC = () => {
         }
 
         try {
-            // Esta petición requiere que tengas el endpoint DELETE /api/users/:id implementado en tu API
+            // Este endpoint DELETE /api/users/:id requiere autenticación y autorización
             const response = await fetch(`${API_USERS_URL}/${userId}`, {
                 method: 'DELETE',
                 headers: {
@@ -251,20 +191,20 @@ const GestionUsuarios: React.FC = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Error al eliminar usuario');
+                throw new Error(data.message || 'Error al eliminar usuario.');
             }
 
-            setUsers(prevUsers => prevUsers.filter(user => user.id !== userId)); // Elimina del estado local
+            setUsers(prevUsers => prevUsers.filter(user => user.id !== userId)); // Eliminar del estado local
             setMessage({ type: 'success', text: data.message || `Usuario '${username}' eliminado.` });
         } catch (error: any) {
             console.error('Error al eliminar usuario:', error);
-            setMessage({ type: 'error', text: error.message || 'Error al eliminar usuario. Asegúrate de que tu API tiene el endpoint DELETE /api/users/:id' });
+            setMessage({ type: 'error', text: error.message || 'Error al eliminar usuario. Asegúrate de que tu API tiene el endpoint DELETE /api/users/:id.' });
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Manejador para cambiar el estado de un usuario (activo/inactivo)
+    // --- Manejador para cambiar el estado activo/inactivo de un usuario ---
     const toggleUserStatus = async (userId: string, currentStatus: boolean, username: string) => {
         setMessage(null);
         const token = getToken();
@@ -275,7 +215,7 @@ const GestionUsuarios: React.FC = () => {
         }
 
         try {
-            // Esta petición requiere que tengas el endpoint PATCH /api/users/:id/toggle-status implementado en tu API
+            // Este endpoint PATCH /api/users/:id/toggle-status requiere autenticación y autorización
             const response = await fetch(`${API_USERS_URL}/${userId}/toggle-status`, {
                 method: 'PATCH',
                 headers: {
@@ -288,17 +228,21 @@ const GestionUsuarios: React.FC = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Error al cambiar estado de usuario');
+                throw new Error(data.message || 'Error al cambiar estado de usuario.');
             }
 
             // Actualiza el estado local para reflejar el cambio y el timestamp
             setUsers(prevUsers =>
-                prevUsers.map(user => (user.id === userId ? { ...user, activo: !currentStatus, actualizado_en: new Date().toISOString() } : user))
+                prevUsers.map(user =>
+                    user.id === userId
+                        ? { ...user, activo: !currentStatus, actualizado_en: data.user?.actualizado_en || new Date().toISOString() }
+                        : user
+                )
             );
             setMessage({ type: 'success', text: data.message || `Estado de '${username}' actualizado a ${!currentStatus ? 'Activo' : 'Inactivo'}.` });
         } catch (error: any) {
             console.error('Error al cambiar estado de usuario:', error);
-            setMessage({ type: 'error', text: error.message || 'Error al cambiar estado de usuario. Asegúrate de que tu API tiene el endpoint PATCH /api/users/:id/toggle-status' });
+            setMessage({ type: 'error', text: error.message || 'Error al cambiar estado de usuario. Asegúrate de que tu API tiene el endpoint PATCH /api/users/:id/toggle-status.' });
         }
     };
 
@@ -364,7 +308,8 @@ const GestionUsuarios: React.FC = () => {
                 {isLoading ? (
                     <p className="loading-message">Cargando usuarios...</p>
                 ) : users.length === 0 ? (
-                    <p>No hay usuarios registrados. Asegúrate de que tu API está funcionando y tienes usuarios en la base de datos.</p>
+                    // Mensaje cuando no hay usuarios o no se pudieron cargar
+                    <p>No hay usuarios registrados o no tienes permiso para verlos. Asegúrate de que tu API esté funcionando y tengas usuarios en la base de datos.</p>
                 ) : (
                     <div className="table-responsive">
                         <table className="users-table">
@@ -414,13 +359,13 @@ const GestionUsuarios: React.FC = () => {
                                         <td className={user.activo ? 'status-active' : 'status-inactive'}>
                                             {editingUser?.id === user.id ? (
                                                 <select
-                                                    value={editActivo ? 'Activo' : 'Inactivo'}
-                                                    onChange={(e) => setEditActivo(e.target.value === 'Activo')}
+                                                    value={editActivo ? 'true' : 'false'} // Valores de option como string
+                                                    onChange={(e) => setEditActivo(e.target.value === 'true')}
                                                     disabled={isEditingSubmitting}
                                                     className="edit-select"
                                                 >
-                                                    <option value="Activo">Activo</option>
-                                                    <option value="Inactivo">Inactivo</option>
+                                                    <option value="true">Activo</option>
+                                                    <option value="false">Inactivo</option>
                                                 </select>
                                             ) : (
                                                 user.activo ? 'Activo' : 'Inactivo'
@@ -481,3 +426,10 @@ const GestionUsuarios: React.FC = () => {
 };
 
 export default GestionUsuarios;
+
+
+//Crear nuevos usuarios: Incluye campos para el nombre de usuario, la contraseña y el rol.
+//Listar usuarios existentes: Muestra su nombre de usuario, rol, estado (activo/inactivo), fecha de creación y última actualización.
+//Editar detalles de usuario: Permite modificar el nombre de usuario, el rol y el estado de actividad.
+//Cambiar el estado del usuario: Activar o desactivar a un usuario con un solo clic.
+//Eliminar usuarios: Con una confirmación previa para evitar borrados accidentales.
