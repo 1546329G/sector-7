@@ -111,7 +111,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           </div>
           {error && <p style={{ color: 'red', marginBottom: '15px' }}>{error}</p>}
           {success && <p style={{ color: 'green', marginBottom: '15px' }}>¡Inicio de sesión exitoso!</p>}
-          <button
+          <button 
             type="submit"
             style={{
               width: '100%',

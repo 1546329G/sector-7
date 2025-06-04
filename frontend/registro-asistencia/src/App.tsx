@@ -45,7 +45,7 @@ const App: React.FC = () => {
           path="/"
           element={
             isAuthenticated ? (
-              <Navigate to="/home" replace />
+              <Navigate to="/home/" replace />
             ) : (
               <Navigate to="/login" replace />
             )
