@@ -1,4 +1,4 @@
-
+/* --- Contenedor Principal de la Aplicación --- */
 .asistencia-container {
     padding: 50px 60px; /* Más padding para un aspecto más espacioso y premium */
     background-color: #ffffff; /* Fondo blanco limpio */
@@ -7,9 +7,16 @@
     border-radius: 8px; /* Bordes ligeramente redondeados para un toque moderno */
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Sombra más suave y extendida */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente legible */
+    max-width: 1200px; /* Limita el ancho máximo para mejor legibilidad en pantallas grandes */
+    margin: 30px auto; /* Centra el contenedor en la página */
 }
 
-.asistencia-container h2 {
+/* --- Título Principal de la Página (Ajustado si lo usas) --- */
+/*
+Si decides añadir un <h2> general al principio del componente React, usa esta clase.
+Si no, el diseño de la imagen no muestra un <h2> tan prominente, sino que se centra en el título del profesor.
+*/
+.asistencia-container .page-title {
     margin-top: 0;
     margin-bottom: 40px; /* Más espacio debajo del título */
     font-size: 2.2em; /* Título más grande y prominente */
@@ -18,42 +25,84 @@
     font-weight: 600; /* Un poco más de peso para el título */
     border-bottom: 1px solid #e0e0e0; /* Línea sutil debajo del título */
     padding-bottom: 15px;
+    display: none; /* Oculta este título si el diseño de la imagen no lo incluye */
 }
 
+/* --- Selector de Modo de Vista (Botones de Alternancia) --- */
+.view-mode-selector {
+    display: flex;
+    justify-content: center; /* Centra los botones */
+    margin-bottom: 30px; /* Espacio debajo del selector */
+    gap: 15px; /* Espacio entre los botones */
+    padding: 15px; /* Ajustado para ser menos prominente, como en la imagen */
+    background-color: transparent; /* Fondo transparente */
+    border-radius: 8px;
+    /* box-shadow: none;  // Elimina la sombra si no la quieres */
+}
+
+.view-mode-selector button {
+    padding: 12px 25px;
+    border: 1px solid #d0d0d0; /* Bordes sutiles para los botones */
+    border-radius: 6px;
+    font-size: 1em; /* Un poco más pequeño que los botones principales */
+    font-weight: bold;
+    color: #555; /* Color de texto predeterminado */
+    cursor: pointer;
+    background-color: #f7f7f7; /* Fondo más claro para los no seleccionados */
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    min-width: 180px; /* Ajuste el ancho mínimo para que se vean bien */
+}
+
+.view-mode-selector button.active {
+    background-color: #3498db; /* Azul corporativo para el botón activo */
+    color: white;
+    border-color: #3498db;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); /* Sombra para el botón activo */
+}
+
+.view-mode-selector button:hover:not(.active) {
+    background-color: #e0e0e0; /* Un ligero cambio de fondo al pasar el ratón */
+    color: #333;
+}
+
+.view-mode-selector button.active:hover {
+    background-color: #2980b9; /* Tono más oscuro al pasar el ratón en activo */
+}
+
+/* --- Controles de Filtro y Selección (Periodo, Empleado, Semana) --- */
 .filtros-asistencia {
     display: flex;
-    flex-wrap: wrap; /* Permite que los elementos salten de línea en pantallas pequeñas */
-    gap: 20px; /* Espacio entre los elementos de filtro */
+    flex-wrap: wrap;
+    gap: 20px;
     align-items: center;
-    justify-content: center; /* Centra los filtros */
-    margin-bottom: 30px; /* Espacio debajo de los filtros */
-    padding: 20px;
-    background-color: #f8fbfd; /* Fondo ligeramente diferente para los filtros */
-    border-radius: 8px;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Sombra interna sutil */
+    justify-content: flex-start; /* Alinea los filtros a la izquierda, como en la imagen */
+    margin-bottom: 30px;
+    padding: 0; /* Elimina el padding y fondo si solo son selectores simples */
+    background-color: transparent;
+    box-shadow: none;
+    border-bottom: 1px solid #e0e0e0; /* Una línea sutil debajo de los filtros */
+    padding-bottom: 20px; /* Espacio entre la línea y los selectores */
 }
 
-.rango-fechas-group {
+.form-group {
     display: flex;
-    align-items: center;
-    gap: 10px; /* Espacio entre los inputs de fecha y el guion */
+    flex-direction: row; /* Etiquetas e inputs en la misma línea */
+    align-items: center; /* Alineación vertical */
+    gap: 10px; /* Espacio entre label y select */
+    min-width: unset; /* Quita el min-width */
+    margin-right: 20px; /* Espacio entre grupos de formulario */
 }
 
-.rango-fechas-group label {
+.form-group label {
     font-weight: 500;
     color: #34495e;
-    font-size: 0.95em;
-    margin-right: 5px; /* Espacio entre la etiqueta y el primer input */
+    font-size: 1em; /* Tamaño de fuente normal para las etiquetas */
+    white-space: nowrap; /* Evita que la etiqueta se rompa */
 }
 
-.rango-fechas-group span {
-    font-size: 1.2em;
-    color: #555;
-    font-weight: bold;
-}
-
-.date-input {
-    padding: 10px 12px;
+/* Estilo base para todos los inputs de formulario (select, input[type="number"]) */
+.form-input {
+    padding: 8px 12px; /* Ajuste el padding */
     border: 1px solid #c0d0e0;
     border-radius: 4px;
     font-size: 1em;
@@ -61,15 +110,141 @@
     background-color: #ffffff;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
     outline: none;
-    cursor: pointer; /* Indica que es clickeable */
+    width: auto; /* Ancho automático para los selectores */
+    min-width: 180px; /* Asegura un ancho mínimo para los selectores */
+    cursor: pointer;
 }
 
-.date-input:focus {
+.form-input:focus {
     border-color: #3498db;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-/* Estilos para los botones */
+/* --- Información del Profesor (en vista individual) --- */
+.profesor-info-crud {
+    background-color: #ffffff; /* Fondo blanco para esta sección */
+    padding: 20px 0; /* Menos padding vertical, sin horizontal */
+    border-radius: 0; /* Sin bordes redondeados */
+    margin-bottom: 25px;
+    text-align: left; /* Alineado a la izquierda como en la imagen */
+    box-shadow: none; /* Sin sombra */
+    border-bottom: 1px solid #eee; /* Solo un borde inferior sutil */
+}
+
+.profesor-info-crud h3 {
+    color: #1a3a5e;
+    font-size: 1.6em; /* Un poco más pequeño que un <h2> principal */
+    margin-top: 0;
+    margin-bottom: 5px; /* Menos espacio debajo del nombre */
+    font-weight: 600;
+}
+
+.profesor-info-crud p {
+    color: #777; /* Un gris más suave para el texto secundario */
+    font-size: 0.9em; /* Más pequeño para el texto secundario */
+    margin: 0;
+}
+
+/* --- Contenedor de la Tabla de Asistencia --- */
+.asistencia-table-container {
+    overflow-x: auto;
+    margin-top: 0px; /* Elimina el margen superior ya que la info del profesor lo maneja */
+    border-radius: 8px;
+    border: 1px solid #e0e0e0; /* Borde alrededor de la tabla */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra para la tabla */
+}
+
+/* --- Tabla de Asistencia --- */
+.asistencia-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.asistencia-table th,
+.asistencia-table td {
+    padding: 12px 10px; /* Ajusta el padding para la tabla */
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.asistencia-table th {
+    background-color: #eaf1f7;
+    color: #1a3a5e;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85em; /* Un poco más pequeño */
+    border-top: 1px solid #e0e0e0;
+    white-space: nowrap;
+}
+
+.asistencia-table td {
+    color: #444; /* Color de texto más oscuro para los datos */
+    font-size: 0.95em;
+}
+
+.asistencia-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.asistencia-table tbody tr:hover {
+    background-color: #f7fbfc;
+}
+
+.asistencia-table td:first-child {
+    text-align: left; /* Alinea la primera columna (Semana/Profesor) a la izquierda */
+    font-weight: 500;
+    color: #34495e;
+    min-width: 150px; /* Asegura que la columna de semana tenga un ancho decente */
+}
+
+/* Estilos específicos para inputs de número (horas) dentro de la tabla */
+.hour-input {
+    width: 60px; /* Ancho fijo para los campos de horas */
+    padding: 6px 5px; /* Ajusta el padding */
+    text-align: center;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    font-size: 0.9em; /* Un poco más pequeño para el texto dentro del input */
+    -moz-appearance: textfield; /* Elimina flechas en Firefox */
+}
+
+/* Elimina flechas en Chrome, Safari, Edge */
+.hour-input::-webkit-outer-spin-button,
+.hour-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* --- Resumen y Acciones (Botón de Guardar) --- */
+.summary-and-actions-crud {
+    display: flex;
+    justify-content: space-between; /* Espacio entre el resumen y el botón */
+    align-items: center;
+    margin-top: 30px;
+    padding: 20px 25px;
+    background-color: #f8fbfd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.summary-totals {
+    display: flex;
+    gap: 25px;
+    font-size: 1.1em;
+    color: #1a3a5e;
+    font-weight: 600;
+    flex-wrap: wrap;
+}
+
+.summary-totals span {
+    white-space: nowrap;
+}
+
+/* --- Botones Generales (Para el botón de Guardar Cambios) --- */
 .button {
     padding: 12px 25px;
     border: none;
@@ -79,16 +254,16 @@
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    min-width: 120px; /* Ancho mínimo para los botones */
+    min-width: 150px; /* Ajusta el ancho mínimo para el botón de guardar */
 }
 
 .primary-button {
-    background-color: #3498db; /* Azul corporativo primario */
+    background-color: #3498db;
     box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
 }
 
 .primary-button:hover {
-    background-color: #2980b9; /* Tono más oscuro de azul al pasar el ratón */
+    background-color: #2980b9;
     transform: translateY(-2px);
     box-shadow: 0 6px 14px rgba(52, 152, 219, 0.4);
 }
@@ -98,8 +273,8 @@
     box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
 }
 
-.secondary-button {
-    background-color: #6c7a89; /* Gris azulado para el botón secundario */
+.secondary-button { /* Se mantiene para los botones de alternancia no activos */
+    background-color: #6c7a89;
     box-shadow: 0 4px 10px rgba(108, 122, 137, 0.3);
 }
 
@@ -114,43 +289,48 @@
     box-shadow: 0 2px 6px rgba(108, 122, 137, 0.3);
 }
 
-/* Estilos para la tabla de asistencia */
-.asistencia-table-container {
-    overflow-x: auto; /* Permite scroll horizontal en tablas grandes en móviles */
-    margin-top: 30px;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0; /* Borde alrededor de la tabla */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra para la tabla */
+.button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
-.asistencia-table {
-    width: 100%;
-    border-collapse: collapse; /* Elimina el espacio entre bordes de celdas */
-    min-width: 600px; /* Asegura que la tabla no sea demasiado estrecha */
-}
-
-.asistencia-table th,
-.asistencia-table td {
+/* --- Mensajes de Feedback (Info, Error, Carga) --- */
+.message {
     padding: 15px 20px;
-    text-align: left;
-    border-bottom: 1px solid #f0f0f0; /* Líneas divisorias más claras */
+    border-radius: 6px;
+    margin-top: 20px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid;
+    animation: fadeIn 0.5s ease-out; /* Animación de aparición */
 }
 
-.asistencia-table th {
-    background-color: #eaf1f7; /* Fondo para el encabezado de la tabla */
-    color: #1a3a5e;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.9em;
-    border-top: 1px solid #e0e0e0;
+.message.info {
+    background-color: #e0f2f7;
+    color: #2196f3;
+    border-color: #b3e5fc;
 }
 
-.asistencia-table tbody tr:last-child td {
-    border-bottom: none; /* Elimina el borde inferior de la última fila */
+.message.error {
+    background-color: #ffebee;
+    color: #ef5350;
+    border-color: #ef9a9a;
 }
 
-.asistencia-table tbody tr:hover {
-    background-color: #f7fbfc; /* Resaltado al pasar el ratón por las filas */
+.message.success {
+    background-color: #e8f5e9;
+    color: #4caf50;
+    border-color: #c8e6c9;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 20px;
+    color: #555;
+    font-style: italic;
+    animation: pulse 1.5s infinite alternate;
 }
 
 .no-data-message {
@@ -159,77 +339,140 @@
     color: #777;
     font-style: italic;
     background-color: #fdfdfd;
-}
-
-/* Mensajes de feedback */
-.message {
-    padding: 15px 20px;
-    border-radius: 6px;
+    border-radius: 8px;
     margin-top: 20px;
-    text-align: center;
-    font-weight: bold;
-    border: 1px solid;
-}
-
-.message.info {
-    background-color: #e0f2f7; /* Azul claro */
-    color: #2196f3; /* Azul */
-    border-color: #b3e5fc;
-}
-
-.message.error {
-    background-color: #ffebee; /* Rojo claro */
-    color: #ef5350; /* Rojo */
-    border-color: #ef9a9a;
-}
-
-.loading-message {
-    text-align: center;
-    padding: 20px;
-    color: #555;
-    font-style: italic;
+    border: 1px dashed #e0e0e0;
 }
 
 
-/* Media queries para responsividad */
+/* --- Animaciones --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    from { opacity: 0.7; }
+    to { opacity: 1; }
+}
+
+
+/* --- Media queries para responsividad --- */
 @media (max-width: 900px) {
     .asistencia-container {
         padding: 30px 20px;
+        margin: 20px auto;
+    }
+
+    .asistencia-container .page-title {
+        font-size: 1.8em;
+        margin-bottom: 30px;
+    }
+
+    .view-mode-selector {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .view-mode-selector button {
+        min-width: unset;
+        width: 100%;
     }
 
     .filtros-asistencia {
-        flex-direction: column; /* Apila los filtros en pantallas pequeñas */
-        align-items: stretch; /* Estira los elementos para ocupar el ancho */
-    }
-
-    .rango-fechas-group {
-        flex-direction: column; /* Apila las fechas en pantallas pequeñas */
+        flex-direction: column;
         align-items: stretch;
-        width: 100%;
+        padding: 15px 0; /* Ajustado */
+        border-bottom: none; /* Opcional: si prefieres sin línea en móvil */
     }
 
-    .rango-fechas-group label {
-        text-align: center;
-        margin-bottom: 10px;
+    .form-group {
+        flex-direction: column; /* Apila etiquetas e inputs */
+        align-items: flex-start; /* Alinea a la izquierda */
+        min-width: unset;
+        width: 100%;
+        margin-right: 0;
     }
 
-    .date-input {
+    .form-group label {
         width: 100%;
+        text-align: left;
+        margin-bottom: 5px;
+    }
+
+    .form-input {
+        width: 100%; /* Los selectores ocupan todo el ancho */
+        min-width: unset;
     }
 
     .button {
-        width: 100%; /* Botones de ancho completo */
+        width: 100%;
         min-width: unset;
     }
 
     .asistencia-table th,
     .asistencia-table td {
-        padding: 10px 15px; /* Menos padding en celdas para pantallas pequeñas */
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+
+    .asistencia-table {
+        min-width: 600px; /* Mantiene un mínimo para la tabla horizontal */
+    }
+
+    .summary-and-actions-crud {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+        gap: 20px;
+    }
+
+    .summary-totals {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
     }
 }
 
 @media (max-width: 600px) {
-    .asistencia-container h2 {
-        font-size: 1.8em;
+    .asistencia-container {
+        padding: 20px 15px;
+    }
+
+    .asistencia-container .page-title {
+        font-size: 1.6em;
+        margin-bottom: 25px;
+    }
+
+    .filtros-asistencia {
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .form-input {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+
+    .button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    .hour-input {
+        width: 50px; /* Ancho aún más pequeño para inputs de horas */
+        padding: 6px 3px;
+        font-size: 0.85em;
+    }
+
+    .asistencia-table th,
+    .asistencia-table td {
+        padding: 8px 10px;
+        font-size: 0.8em;
+    }
+
+    .summary-totals {
+        font-size: 1em;
     }
 }

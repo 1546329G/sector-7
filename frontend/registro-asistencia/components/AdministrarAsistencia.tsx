@@ -1,643 +1,436 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../css/AdministrarAsistencia.css'; // Asegúrate de tener este CSS
+import '../css/AdministrarAsistencia.css'; // Ensure this CSS file is adapted or created
 
-// --- Tipos de Datos (Interfaces) ---
-
-/**
- * Tipo para un profesor básico, usado para obtener su ID y nombre.
- */
-interface ProfesorBasico {
-    id: string;
-    nombre: string;
+// --- Interfaces ---
+interface Periodo {
+  value: string;
+  label: string;
 }
 
-/**
- * Tipo para un registro de asistencia diario tal como vendría del backend
- * (Este es el que se usa en el mock y el que se enviaría al guardar).
- */
-interface DailyAttendanceRecord {
-    profesorId: string;
-    date: string; // Formato 'YYYY-MM-DD'
-    hours: number;
+interface Semana {
+  inicio: string;
+  fin: string;
+  label: string;
 }
 
-/**
- * Tipo para almacenar las horas de un día específico.
- */
+interface Professor {
+  id: string;
+  nombre: string;
+  idNumber: string;
+  contractHours: number;
+}
+
 interface DailyHours {
-    date: string; // Formato 'YYYY-MM-DD'
-    hours: number | ''; // Permite vacío para inputs no llenados
+  lunes: number;
+  martes: number;
+  miercoles: number;
+  jueves: number;
+  viernes: number;
+  sabado: number;
+  domingo: number;
 }
 
-/**
- * Tipo para almacenar las horas diarias de una semana para un profesor.
- */
-interface WeeklyAttendance {
-    weekStartDate: string; // Formato 'YYYY-MM-DD' para el inicio de la semana (Lunes)
-    days: DailyHours[]; // Array de 7 elementos para Lunes a Domingo
-    weeklyTotal: number; // Total calculado automáticamente
+// For single professor, multiple weeks view
+interface ProfessorWeeklyAttendance {
+  weekId: string; // Unique ID for the data row (e.g., YYYY-MM-DD_YYYY-MM-DD of the week)
+  weekLabel: string;
+  semanaInfo: Semana; // Original Semana object
+  days: DailyHours;
 }
 
-/**
- * Tipo para el estado de asistencia de un profesor en el rango de fechas.
- * Utilizado para mostrar los datos en la tabla de administración.
- */
-interface ProfesorAttendanceDisplay {
-    id: string; // ID del profesor
-    nombre: string;
-    weeks: WeeklyAttendance[]; // Array de semanas dentro del rango seleccionado
-    rangeTotal: number; // Total de horas para todo el rango
+// For all professors, single week view
+interface AllProfessorsWeeklyEntry {
+  profesorId: string;
+  profesorNombre: string;
+  days: DailyHours;
 }
 
-/**
- * Tipo para un registro de asistencia resumido (para la vista de reporte).
- */
-interface AsistenciaRegistroResumen {
-    id: string;
-    nombre: string;
-    horasSem: number;
-    mes: string; // O puedes usar Date si prefieres manejar fechas más rígidamente
-}
+type ViewMode = 'singleProfessorPeriod' | 'allProfessorsWeek';
+
+// --- Mock Data & Helpers (mostly same as before) ---
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const generateMockPeriods = (): Periodo[] => {
+  const currentYear = new Date().getFullYear();
+  const periods: Periodo[] = [];
+  const monthNames = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+  for (let i = 1; i <= 3; i++) {
+    const startMonthIndex = i * 2 - 1;
+    const endMonthIndex = startMonthIndex + 1;
+    if (startMonthIndex >= 12 || endMonthIndex >= 12) break;
+    const startDate = new Date(currentYear, startMonthIndex, 1);
+    const endDate = new Date(currentYear, endMonthIndex + 1, 0);
+    const value = `${formatDate(startDate)}_${formatDate(endDate)}`;
+    const label = `${monthNames[startMonthIndex]} - ${monthNames[endMonthIndex]} ${currentYear}`;
+    periods.push({ value, label });
+  }
+  periods.unshift({
+    value: `2024-02-01_2024-03-31`,
+    label: "FEBRERO - MARZO 2024"
+  });
+  return periods;
+};
+
+const generateMockSemanasForPeriod = (periodoValue: string): Semana[] => {
+  if (!periodoValue) return [];
+  const [startPeriodStr, endPeriodStr] = periodoValue.split('_');
+  const startPeriod = new Date(startPeriodStr + 'T00:00:00');
+  const endPeriod = new Date(endPeriodStr + 'T00:00:00');
+  const semanas: Semana[] = [];
+  let currentWeekStart = new Date(startPeriod);
+  let weekCounter = 1;
+  const dayOfWeek = currentWeekStart.getDay();
+  if (dayOfWeek === 0) {
+    currentWeekStart.setDate(currentWeekStart.getDate() + 1);
+  } else if (dayOfWeek > 1) {
+    currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek - 1));
+  }
+  while (currentWeekStart <= endPeriod) {
+    const currentWeekEnd = new Date(currentWeekStart);
+    currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+    const displayWeekEnd = new Date(Math.min(currentWeekEnd.getTime(), endPeriod.getTime()));
+    const formatShortDate = (d: Date) => `${String(d.getDate()).padStart(2, '0')} ${d.toLocaleString('es-ES', { month: 'short' }).toUpperCase().replace('.', '')}`;
+    const label = `Semana ${weekCounter}: ${formatShortDate(currentWeekStart)} - ${formatShortDate(displayWeekEnd)}`;
+    semanas.push({
+      inicio: formatDate(currentWeekStart),
+      fin: formatDate(currentWeekEnd),
+      label: label,
+    });
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    weekCounter++;
+     if (currentWeekStart > endPeriod && semanas.length > 0 && new Date(semanas[semanas.length-1].inicio) > endPeriod) {
+        semanas.pop(); // Remove last week if its start is already past period end
+        break;
+    }
+  }
+  return semanas;
+};
+
+const mockProfessors: Professor[] = [
+  { id: 'EMP001', nombre: 'ANQUISE JIHUAÑA, YUSELENIN', idNumber: '001634701', contractHours: 19 },
+  { id: 'EMP002', nombre: 'GARCIA PEREZ, ANA LUCIA', idNumber: '001634702', contractHours: 24 },
+  { id: 'EMP003', nombre: 'LOPEZ PAREDES, CARLOS MARTIN', idNumber: '001634703', contractHours: 20 },
+];
+
+let mockProfessorDataStore: Record<string, DailyHours> = {};
 
 const AdministrarAsistencia: React.FC = () => {
-    // --- Estados Compartidos ---
-    const [fechaInicio, setFechaInicio] = useState<string>('');
-    const [fechaFin, setFechaFin] = useState<string>('');
-    const [message, setMessage] = useState<{ type: 'info' | 'error' | 'success', text: string } | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false); // Estado para indicar si se están cargando datos
-    const [isSaving, setIsSaving] = useState<boolean>(false); // Estado para indicar si se están guardando datos
+  const [viewMode, setViewMode] = useState<ViewMode>('singleProfessorPeriod');
+  const [periods, setPeriods] = useState<Periodo[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('');
+  
+  // For single professor view
+  const [selectedProfessorId, setSelectedProfessorId] = useState<string>('');
+  const [professorDisplayName, setProfessorDisplayName] = useState<string>('');
+  const [professorContractId, setProfessorContractId] = useState<string>('');
+  const [professorContractHours, setProfessorContractHours] = useState<number>(0);
+  const [attendanceGridData, setAttendanceGridData] = useState<ProfessorWeeklyAttendance[]>([]);
 
-    // --- Estados para la Vista de Administración (Edición Diaria) ---
-    const [profesores, setProfesores] = useState<ProfesorBasico[]>([]); // Lista de docentes
-    const [profesorAttendanceData, setProfesorAttendanceData] = useState<ProfesorAttendanceDisplay[]>([]); // Datos de asistencia por docente
+  // For all professors - single week view
+  const [selectedWeekForBulkEditValue, setSelectedWeekForBulkEditValue] = useState<string>(''); // stores "inicio_fin"
+  const [allProfessorsAttendanceData, setAllProfessorsAttendanceData] = useState<AllProfessorsWeeklyEntry[]>([]);
 
-    // --- Estados para la Vista de Reporte (Resumen Mensual) ---
-    const [registrosAsistenciaResumen, setRegistrosAsistenciaResumen] = useState<AsistenciaRegistroResumen[]>([]);
+  const [semanasDelPeriodo, setSemanasDelPeriodo] = useState<Semana[]>([]);
+  
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<{ type: 'info' | 'error' | 'success'; text: string } | null>(null);
 
-    // --- Estado para la selección de vista ---
-    const [vistaActual, setVistaActual] = useState<'administrar' | 'reporte'>('administrar');
+  // Initialize periods and default professor
+  useEffect(() => {
+    const initialPeriods = generateMockPeriods();
+    setPeriods(initialPeriods);
+    if (initialPeriods.length > 0) {
+      const defaultPeriod = initialPeriods.find(p => p.label === "FEBRERO - MARZO 2024");
+      setSelectedPeriod(defaultPeriod ? defaultPeriod.value : initialPeriods[0].value);
+    }
+    if (mockProfessors.length > 0) {
+      setSelectedProfessorId(mockProfessors[0].id);
+    }
+  }, []);
 
-    // --- Constantes ---
-    const dayNames = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  // Update semanasDelPeriodo when selectedPeriod changes
+  useEffect(() => {
+    if (selectedPeriod) {
+      const weeks = generateMockSemanasForPeriod(selectedPeriod);
+      setSemanasDelPeriodo(weeks);
+      // Reset selected week for bulk edit if period changes
+      setSelectedWeekForBulkEditValue(''); 
+      setAllProfessorsAttendanceData([]);
+      if (viewMode === 'allProfessorsWeek' && weeks.length > 0) {
+        // Optionally auto-select first week
+        // setSelectedWeekForBulkEditValue(`${weeks[0].inicio}_${weeks[0].fin}`);
+      }
+    } else {
+      setSemanasDelPeriodo([]);
+      setSelectedWeekForBulkEditValue('');
+      setAllProfessorsAttendanceData([]);
+    }
+  }, [selectedPeriod, viewMode]); // Added viewMode to re-evaluate if needed
 
-    // --- Funciones de Utilidad de Fecha ---
+  // Load professor details for single professor view
+  useEffect(() => {
+    if (viewMode === 'singleProfessorPeriod' && selectedProfessorId) {
+      const prof = mockProfessors.find(p => p.id === selectedProfessorId);
+      if (prof) {
+        setProfessorDisplayName(prof.nombre);
+        setProfessorContractId(prof.idNumber);
+        setProfessorContractHours(prof.contractHours);
+      }
+    }
+  }, [selectedProfessorId, viewMode]);
+  
+  const generateDataStoreKey = (profId: string, periodVal: string, semana: Semana | {inicio: string, fin: string}): string => {
+    return `${profId}_${periodVal}_${semana.inicio}_${semana.fin}`;
+  };
 
-    /**
-     * Obtiene una lista de todas las semanas (fechas de inicio de semana, Lunes)
-     * entre dos fechas dadas.
-     * @param start Fecha de inicio del rango (YYYY-MM-DD).
-     * @param end Fecha de fin del rango (YYYY-MM-DD).
-     * @returns Array de strings con las fechas de inicio de cada semana (Lunes).
-     */
-    const getWeeksInRange = (start: string, end: string): string[] => {
-        const weeks: string[] = [];
-        let currentDate = new Date(start + 'T00:00:00');
-        const endDate = new Date(end + 'T00:00:00');
+  // --- Single Professor - Period View Logic ---
+  const loadSingleProfessorData = useCallback(() => {
+    if (!selectedPeriod || !selectedProfessorId || viewMode !== 'singleProfessorPeriod') {
+      setAttendanceGridData([]);
+      return;
+    }
+    setIsLoading(true);
+    setMessage(null);
+    // Ensure semanasDelPeriodo is up-to-date before using it
+    const currentSemanas = generateMockSemanasForPeriod(selectedPeriod);
 
-        // Retrocede hasta el Lunes de la semana de inicio
-        const dayOfWeekStart = currentDate.getDay(); // 0 = Domingo, 1 = Lunes
-        const daysToSubtract = dayOfWeekStart === 0 ? 6 : dayOfWeekStart - 1;
-        currentDate.setDate(currentDate.getDate() - daysToSubtract);
+    const gridData: ProfessorWeeklyAttendance[] = currentSemanas.map((week) => {
+      const storeKey = generateDataStoreKey(selectedProfessorId, selectedPeriod, week);
+      const existingHours = mockProfessorDataStore[storeKey];
+      return {
+        weekId: `${week.inicio}_${week.fin}`,
+        weekLabel: week.label,
+        semanaInfo: week,
+        days: existingHours || { lunes: 0, martes: 0, miercoles: 0, jueves: 0, viernes: 0, sabado: 0, domingo: 0 },
+      };
+    });
+    setAttendanceGridData(gridData);
+    if (currentSemanas.length === 0) setMessage({type: 'info', text: 'No hay semanas para este periodo.'});
+    setIsLoading(false);
+  }, [selectedPeriod, selectedProfessorId, viewMode]);
 
-        // Ajustar el final del rango para asegurar que la última semana completa esté incluida
-        const adjustedEndDate = new Date(endDate);
-        const dayOfWeekEnd = adjustedEndDate.getDay();
-        const daysToAddForEndOfWeek = dayOfWeekEnd === 0 ? 0 : 7 - dayOfWeekEnd; // Si es domingo (0), no sumamos nada; si no, hasta el domingo de esa semana
-        adjustedEndDate.setDate(adjustedEndDate.getDate() + daysToAddForEndOfWeek);
+  useEffect(() => {
+    if (viewMode === 'singleProfessorPeriod') {
+      loadSingleProfessorData();
+    }
+  }, [loadSingleProfessorData]);
 
+  const handleSingleProfessorHourChange = (weekId: string, day: keyof DailyHours, value: string) => {
+    const hours = Math.max(0, parseInt(value, 10) || 0);
+    setAttendanceGridData(prev => prev.map(wd => wd.weekId === weekId ? { ...wd, days: { ...wd.days, [day]: hours } } : wd));
+  };
 
-        while (currentDate.getTime() <= adjustedEndDate.getTime()) {
-            weeks.push(currentDate.toISOString().split('T')[0]);
-            currentDate.setDate(currentDate.getDate() + 7);
-        }
-        return weeks;
-    };
+  const handleSingleProfessorSaveChanges = () => {
+    setIsLoading(true); setMessage(null);
+    attendanceGridData.forEach(weekData => {
+      const storeKey = generateDataStoreKey(selectedProfessorId, selectedPeriod, weekData.semanaInfo);
+      mockProfessorDataStore[storeKey] = { ...weekData.days };
+    });
+    setTimeout(() => {
+      setIsLoading(false); setMessage({ type: 'success', text: 'Cambios guardados (Profesor Individual).' });
+      loadSingleProfessorData();
+    }, 500);
+  };
+  
+  const calculateWeeklyTotal = (days: DailyHours): number => Object.values(days).reduce((s, h) => s + (Number(h) || 0), 0);
+  const overallTotalHoursForSingleProfessor = attendanceGridData.reduce((total, cw) => total + calculateWeeklyTotal(cw.days), 0);
 
+  // --- All Professors - Single Week View Logic ---
+  const loadAllProfessorsForWeek = useCallback(() => {
+    if (!selectedPeriod || !selectedWeekForBulkEditValue || viewMode !== 'allProfessorsWeek') {
+      setAllProfessorsAttendanceData([]);
+      return;
+    }
+    setIsLoading(true); setMessage(null);
+    const [selWeekInicio, selWeekFin] = selectedWeekForBulkEditValue.split('_');
+    const weekForStore: Semana = { inicio: selWeekInicio, fin: selWeekFin, label: "" }; // Label not needed for key
 
-    /**
-     * Obtiene los 7 días de una semana dado su Lunes de inicio.
-     * @param weekStartDate Fecha de inicio de la semana (Lunes) en formato YYYY-MM-DD.
-     * @returns Array de objetos DailyHours para la semana.
-     */
-    const getDaysOfWeek = (weekStartDate: string): DailyHours[] => {
-        const start = new Date(weekStartDate + 'T00:00:00');
-        const days: DailyHours[] = [];
-        for (let i = 0; i < 7; i++) {
-            const currentDay = new Date(start);
-            currentDay.setDate(start.getDate() + i);
-            days.push({
-                date: currentDay.toISOString().split('T')[0],
-                hours: '' // Inicialmente vacío para la entrada
-            });
-        }
-        return days;
-    };
+    const data: AllProfessorsWeeklyEntry[] = mockProfessors.map(prof => {
+      const storeKey = generateDataStoreKey(prof.id, selectedPeriod, weekForStore);
+      const existingHours = mockProfessorDataStore[storeKey];
+      return {
+        profesorId: prof.id,
+        profesorNombre: prof.nombre,
+        days: existingHours || { lunes: 0, martes: 0, miercoles: 0, jueves: 0, viernes: 0, sabado: 0, domingo: 0 },
+      };
+    });
+    setAllProfessorsAttendanceData(data);
+    if (mockProfessors.length === 0) setMessage({type:'info', text:'No hay profesores para mostrar.'});
+    setIsLoading(false);
+  }, [selectedPeriod, selectedWeekForBulkEditValue, viewMode]);
 
-    // --- Carga de Datos (Simulada con `useCallback`) para AMBAS vistas ---
+  useEffect(() => {
+    if (viewMode === 'allProfessorsWeek') {
+      loadAllProfessorsForWeek();
+    }
+  }, [loadAllProfessorsForWeek]);
 
-    /**
-     * Carga los datos de docentes y asistencia para la vista de administración.
-     * Simula llamadas a una API para datos detallados.
-     */
-    const fetchAdminData = useCallback(async () => {
-        setIsLoading(true);
-        setMessage(null);
-        setProfesores([]);
-        setProfesorAttendanceData([]);
+  const handleBulkHourChange = (profesorId: string, day: keyof DailyHours, value: string) => {
+    const hours = Math.max(0, parseInt(value, 10) || 0);
+    setAllProfessorsAttendanceData(prev => prev.map(entry => 
+      entry.profesorId === profesorId ? { ...entry, days: { ...entry.days, [day]: hours } } : entry
+    ));
+  };
 
-        try {
-            if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
-                setMessage({ type: 'error', text: 'La fecha de inicio no puede ser posterior a la fecha fin.' });
-                setIsLoading(false);
-                return;
-            }
+  const handleBulkSaveChanges = () => {
+    if (!selectedWeekForBulkEditValue) {
+        setMessage({type: 'error', text: 'Por favor, selecciona una semana para guardar.'});
+        return;
+    }
+    setIsLoading(true); setMessage(null);
+    const [selWeekInicio, selWeekFin] = selectedWeekForBulkEditValue.split('_');
+    const weekForStore: Semana = { inicio: selWeekInicio, fin: selWeekFin, label: "" };
 
-            // --- SIMULACIÓN DE LLAMADAS AL BACKEND para datos detallados ---
-            await new Promise(resolve => setTimeout(resolve, 800)); // Simular retraso de API
-
-            const mockProfesores: ProfesorBasico[] = [
-                { id: '101', nombre: 'Juan Pérez' },
-                { id: '102', nombre: 'María García' },
-                { id: '103', nombre: 'Carlos Ruiz' },
-                { id: '104', nombre: 'Ana López' },
-            ];
-            setProfesores(mockProfesores);
-
-            const mockDailyAttendance: DailyAttendanceRecord[] = [];
-            if (fechaInicio && fechaFin) {
-                mockProfesores.forEach(prof => {
-                    const weeks = getWeeksInRange(fechaInicio, fechaFin);
-                    weeks.forEach(weekStart => {
-                        const days = getDaysOfWeek(weekStart);
-                        days.forEach(day => {
-                            const dayDate = new Date(day.date + 'T00:00:00');
-                            const startRange = new Date(fechaInicio + 'T00:00:00');
-                            const endRange = new Date(fechaFin + 'T00:00:00');
-
-                            if (dayDate >= startRange && dayDate <= endRange) {
-                                if (Math.random() > 0.6) { // 40% de probabilidad de tener horas
-                                    mockDailyAttendance.push({
-                                        profesorId: prof.id,
-                                        date: day.date,
-                                        hours: Math.floor(Math.random() * 8) + 1 // Horas entre 1 y 8
-                                    });
-                                }
-                            }
-                        });
-                    });
-                });
-            }
-            // --- FIN SIMULACIÓN DE LLAMADAS AL BACKEND ---
-
-            // Procesar los datos crudos para la visualización en la tabla de administración
-            const processedAttendance: ProfesorAttendanceDisplay[] = mockProfesores.map(prof => {
-                const weeklyAttendanceMap: { [weekStartDate: string]: WeeklyAttendance } = {};
-                const weeksInDisplayRange = (fechaInicio && fechaFin) ? getWeeksInRange(fechaInicio, fechaFin) : [];
-
-                // Inicializar todas las semanas y días dentro del rango
-                weeksInDisplayRange.forEach(weekStart => {
-                    const daysOfWeek = getDaysOfWeek(weekStart);
-                    const weekData: WeeklyAttendance = {
-                        weekStartDate: weekStart,
-                        days: daysOfWeek.map(day => ({
-                            date: day.date,
-                            hours: '' // Inicialmente vacío
-                        })),
-                        weeklyTotal: 0
-                    };
-                    weeklyAttendanceMap[weekStart] = weekData;
-                });
-
-                // Llenar con los datos mock de asistencia
-                mockDailyAttendance.forEach(record => {
-                    if (record.profesorId === prof.id) {
-                        const recordDate = new Date(record.date + 'T00:00:00');
-                        const dayOfWeek = recordDate.getDay();
-                        const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                        const weekStart = new Date(recordDate);
-                        weekStart.setDate(recordDate.getDate() - daysToSubtract);
-                        const weekStartDateStr = weekStart.toISOString().split('T')[0];
-
-                        if (weeklyAttendanceMap[weekStartDateStr]) {
-                            const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 0 (Domingo) -> 6, 1 (Lunes) -> 0
-                            weeklyAttendanceMap[weekStartDateStr].days[dayIndex].hours = record.hours;
-                        }
-                    }
-                });
-
-                // Calcular totales
-                let totalRangeHours = 0;
-                const sortedWeeks = Object.values(weeklyAttendanceMap).sort((a, b) => new Date(a.weekStartDate).getTime() - new Date(b.weekStartDate).getTime());
-
-                sortedWeeks.forEach(week => {
-                    week.weeklyTotal = week.days.reduce((sum, day) => sum + (Number(day.hours) || 0), 0);
-                    totalRangeHours += week.weeklyTotal;
-                });
-
-                return {
-                    id: prof.id,
-                    nombre: prof.nombre,
-                    weeks: sortedWeeks,
-                    rangeTotal: totalRangeHours
-                };
-            });
-
-            setProfesorAttendanceData(processedAttendance);
-            if (mockProfesores.length > 0) {
-                setMessage({ type: 'success', text: `Lista de asistencia actualizada. ${processedAttendance.length} docentes con registros.` });
-            } else {
-                setMessage({ type: 'info', text: 'No se encontraron docentes.' });
-            }
-        } catch (error) {
-            setMessage({ type: 'error', text: 'Error al cargar datos de administración. Inténtalo de nuevo.' });
-            console.error('Error al cargar asistencia de administración:', error);
-            setProfesores([]);
-            setProfesorAttendanceData([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [fechaInicio, fechaFin]);
-
-    /**
-     * Carga los datos de asistencia para la vista de reporte (resumen).
-     * Simula llamadas a una API para datos resumidos.
-     */
-    const fetchReporteData = useCallback(async () => {
-        setIsLoading(true);
-        setMessage(null);
-        setRegistrosAsistenciaResumen([]);
-
-        try {
-            if (fechaInicio && fechaFin && new Date(fechaInicio) > new Date(fechaFin)) {
-                setMessage({ type: 'error', text: 'La fecha de inicio no puede ser posterior a la fecha fin.' });
-                setIsLoading(false);
-                return;
-            }
-
-            // --- SIMULACIÓN DE LLAMADAS AL BACKEND para datos resumidos ---
-            await new Promise(resolve => setTimeout(resolve, 800)); // Simular retraso de API
-
-            const mockReporte: AsistenciaRegistroResumen[] = [];
-            const mockProfesoresBase: ProfesorBasico[] = [ // Usamos una base de profesores similar
-                { id: '101', nombre: 'Juan Pérez' },
-                { id: '102', nombre: 'María García' },
-                { id: '103', nombre: 'Carlos Ruiz' },
-                { id: '104', nombre: 'Ana López' },
-            ];
-
-            const start = fechaInicio ? new Date(fechaInicio + 'T00:00:00') : new Date('2024-01-01T00:00:00'); // Default para simulación
-            const end = fechaFin ? new Date(fechaFin + 'T00:00:00') : new Date('2024-12-31T00:00:00'); // Default para simulación
-
-            mockProfesoresBase.forEach(prof => {
-                let currentMonth = new Date(start);
-                while (currentMonth <= end) {
-                    // Simula horas semanales para el mes
-                    const horasSem = Math.floor(Math.random() * 30) + 10; // Horas entre 10 y 40
-                    mockReporte.push({
-                        id: prof.id,
-                        nombre: prof.nombre,
-                        horasSem: horasSem,
-                        mes: currentMonth.toLocaleString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase()
-                    });
-
-                    // Avanzar al siguiente mes
-                    currentMonth.setMonth(currentMonth.getMonth() + 1);
-                    // Asegura que no se salte el día si el mes actual tiene menos días que el original
-                    if (currentMonth.getDate() !== start.getDate()) {
-                        currentMonth.setDate(0); // Va al último día del mes anterior
-                        currentMonth.setDate(start.getDate()); // Vuelve al día original o al último día del mes si no existe
-                    }
-                }
-            });
-            // Filtrar y procesar para el rango real si existen fechas
-            const filteredReporte = mockReporte.filter(record => {
-                if (!fechaInicio || !fechaFin) return true; // Si no hay filtro de fechas, muestra todo
-                const recordDate = new Date(`01 ${record.mes.replace('DE ', '')}`); // Crear fecha para comparación (ej. '01 ENERO 2024')
-                return recordDate >= start && recordDate <= end;
-            });
+    allProfessorsAttendanceData.forEach(entry => {
+      const storeKey = generateDataStoreKey(entry.profesorId, selectedPeriod, weekForStore);
+      mockProfessorDataStore[storeKey] = { ...entry.days };
+    });
+    setTimeout(() => {
+      setIsLoading(false); setMessage({ type: 'success', text: 'Cambios guardados (Todos los Profesores para la Semana).' });
+      loadAllProfessorsForWeek();
+    }, 500);
+  };
+  const totalHoursAllProfessorsThisWeek = allProfessorsAttendanceData.reduce((sum, entry) => sum + calculateWeeklyTotal(entry.days), 0);
 
 
-            setRegistrosAsistenciaResumen(filteredReporte);
-            if (filteredReporte.length > 0) {
-                setMessage({ type: 'success', text: `Reporte de asistencia actualizado. ${filteredReporte.length} registros encontrados.` });
-            } else {
-                setMessage({ type: 'info', text: 'No se encontraron registros de reporte para el rango seleccionado.' });
-            }
-        } catch (error) {
-            setMessage({ type: 'error', text: 'Error al cargar datos de reporte. Inténtalo de nuevo.' });
-            console.error('Error al cargar asistencia de reporte:', error);
-            setRegistrosAsistenciaResumen([]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [fechaInicio, fechaFin]);
+  return (
+    <div className="administrar-asistencia-container-crud">
+      <div className="view-mode-selector">
+        <button onClick={() => setViewMode('singleProfessorPeriod')} className={viewMode === 'singleProfessorPeriod' ? 'active' : ''}>
+          Gestionar por Profesor (Periodo Completo)
+        </button>
+        <button onClick={() => setViewMode('allProfessorsWeek')} className={viewMode === 'allProfessorsWeek' ? 'active' : ''}>
+          Gestionar por Semana (Todos los Profesores)
+        </button>
+      </div>
 
-
-    // --- Efecto para cargar datos al cambiar la vista o las fechas ---
-    useEffect(() => {
-        // Ejecuta la carga de datos relevante solo cuando cambian las fechas o la vista
-        if (vistaActual === 'administrar') {
-            fetchAdminData();
-        } else { // vistaActual === 'reporte'
-            fetchReporteData();
-        }
-    }, [vistaActual, fechaInicio, fechaFin, fetchAdminData, fetchReporteData]); // Dependencias para recarga
-
-    // --- Manejadores de Eventos Generales ---
-
-    const handleFiltrarPorFecha = () => {
-        if (!fechaInicio || !fechaFin) {
-            setMessage({ type: 'error', text: 'Por favor, selecciona AMBAS fechas para filtrar por rango.' });
-            return;
-        }
-        if (new Date(fechaInicio) > new Date(fechaFin)) {
-            setMessage({ type: 'error', text: 'La fecha de inicio no puede ser posterior a la fecha fin.' });
-            return;
-        }
-        setMessage({ type: 'info', text: `Filtrando asistencia en vista de ${vistaActual === 'administrar' ? 'administración' : 'reporte'}...` });
-        // La recarga se maneja por el useEffect gracias a las dependencias de fecha.
-        // No necesitamos llamar a fetchData o fetchReporteData aquí directamente.
-    };
-
-    const handleActualizarListaTotal = () => {
-        setMessage({ type: 'info', text: `Actualizando la lista total en vista de ${vistaActual === 'administrar' ? 'administración' : 'reporte'}...` });
-        setFechaInicio(''); // Limpiar filtro de fecha
-        setFechaFin(''); // Limpiar filtro de fecha
-        // La recarga se maneja por el useEffect gracias a las dependencias de fecha.
-    };
-
-    // --- Manejadores de Eventos para la Vista de Administración (Edición Diaria) ---
-
-    /**
-     * Maneja el cambio en las horas diarias de un input.
-     * Actualiza el estado local y recalcula los totales semanal y del rango.
-     */
-    const handleDailyHoursChange = (
-        profesorId: string,
-        weekIndex: number,
-        dayIndex: number,
-        value: string
-    ) => {
-        setProfesorAttendanceData(prevData => {
-            const newData = prevData.map(prof => {
-                if (prof.id === profesorId) {
-                    const newWeeks = [...prof.weeks];
-                    const newDays = [...newWeeks[weekIndex].days];
-
-                    // Asegúrate de que el valor sea un número o cadena vacía
-                    const parsedValue = value === '' ? '' : Math.max(0, Math.min(24, Number(value)));
-
-                    newDays[dayIndex] = { ...newDays[dayIndex], hours: parsedValue };
-
-                    // Recalcular total semanal
-                    const newWeeklyTotal = newDays.reduce((sum, day) => sum + (Number(day.hours) || 0), 0);
-                    newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays, weeklyTotal: newWeeklyTotal };
-
-                    // Recalcular total del rango
-                    const newRangeTotal = newWeeks.reduce((sum, week) => sum + week.weeklyTotal, 0);
-
-                    return { ...prof, weeks: newWeeks, rangeTotal: newRangeTotal };
-                }
-                return prof;
-            });
-            return newData;
-        });
-    };
-
-    /**
-     * Función para guardar los datos de asistencia.
-     * Simula el envío de datos al backend.
-     */
-    const handleGuardarHoras = async () => {
-        setIsSaving(true);
-        setMessage(null);
-        try {
-            const attendanceToSave: DailyAttendanceRecord[] = [];
-            profesorAttendanceData.forEach(prof => {
-                prof.weeks.forEach(week => {
-                    week.days.forEach(day => {
-                        if (day.hours !== '' && typeof day.hours === 'number' && day.hours >= 0) {
-                            attendanceToSave.push({
-                                profesorId: prof.id,
-                                date: day.date,
-                                hours: day.hours
-                            });
-                        }
-                    });
-                });
-            });
-
-            console.log("Datos a enviar al backend:", attendanceToSave);
-
-            // --- SIMULACIÓN DE LA LLAMADA POST/PUT AL BACKEND ---
-            const response = await fetch('https://egratis.onrender.com/asistencia/guardar', { // URL de tu API para guardar
-                method: 'POST', // O 'PUT' si actualizas registros existentes
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(attendanceToSave),
-            });
-
-            if (response.ok) {
-                setMessage({ type: 'success', text: 'Horas de asistencia guardadas exitosamente.' });
-            } else {
-                const errorData = await response.json();
-                setMessage({ type: 'error', text: `Error al guardar horas: ${errorData.message || response.statusText}` });
-            }
-            // --- FIN SIMULACIÓN DE LLAMADA AL BACKEND ---
-
-        } catch (error) {
-            setMessage({ type: 'error', text: 'Error de conexión al guardar horas. Inténtalo de nuevo.' });
-            console.error('Error al guardar asistencia:', error);
-        } finally {
-            setIsSaving(false);
-            setTimeout(() => setMessage(null), 5000); // Borra mensaje después de 5 segundos
-        }
-    };
-
-
-    // --- Renderizado ---
-
-    // Las semanas a mostrar en las cabeceras de la tabla se recalculan con cada render
-    const weeksInDisplay = fechaInicio && fechaFin ? getWeeksInRange(fechaInicio, fechaFin) : [];
-
-    return (
-        <div className="asistencia-container">
-            <h2>GESTIÓN DE ASISTENCIA DOCENTE</h2>
-
-            <div className="view-selector">
-                <button
-                    className={`button ${vistaActual === 'administrar' ? 'primary-button' : 'secondary-button'}`}
-                    onClick={() => setVistaActual('administrar')}
-                >
-                    Administrar Horas Diarias
-                </button>
-                <button
-                    className={`button ${vistaActual === 'reporte' ? 'primary-button' : 'secondary-button'}`}
-                    onClick={() => setVistaActual('reporte')}
-                >
-                    Consultar Reportes Mensuales
-                </button>
-            </div>
-
-            <div className="filtros-asistencia">
-                <div className="rango-fechas-group">
-                    <label>RANGO DE FECHAS:</label>
-                    <input
-                        type="date"
-                        value={fechaInicio}
-                        onChange={(e) => setFechaInicio(e.target.value)}
-                        className="date-input"
-                        max={fechaFin || undefined}
-                    />
-                    <span>-</span>
-                    <input
-                        type="date"
-                        value={fechaFin}
-                        onChange={(e) => setFechaFin(e.target.value)}
-                        className="date-input"
-                        min={fechaInicio || undefined}
-                    />
-                </div>
-                <button onClick={handleFiltrarPorFecha} className="button primary-button" disabled={isLoading}>
-                    {isLoading ? 'Filtrando...' : 'FILTRAR'}
-                </button>
-                <button onClick={handleActualizarListaTotal} className="button secondary-button" disabled={isLoading}>
-                    {isLoading ? 'Actualizando...' : 'ACTUALIZAR LISTA TOTAL'}
-                </button>
-                {vistaActual === 'administrar' && (
-                    <button onClick={handleGuardarHoras} className="button success-button" disabled={isSaving || profesorAttendanceData.length === 0}>
-                        {isSaving ? 'Guardando...' : 'GUARDAR HORAS'}
-                    </button>
-                )}
-            </div>
-
-            {message && (
-                <p className={`message ${message.type}`}>
-                    {message.text}
-                </p>
-            )}
-
-            {isLoading ? (
-                <p className="loading-message">Cargando registros de asistencia...</p>
-            ) : (
-                <>
-                    {/* --- Vista de Administración de Asistencia (Edición Diaria) --- */}
-                    {vistaActual === 'administrar' && (
-                        <div className="asistencia-table-container">
-                            {profesorAttendanceData.length === 0 && !message?.text.includes("Error") && !isLoading && (
-                                <p className="no-data-message">
-                                    Selecciona un rango de fechas o actualiza la lista para ver la asistencia diaria.
-                                </p>
-                            )}
-
-                            {profesorAttendanceData.length > 0 && (
-                                <table className="asistencia-table">
-                                    <thead>
-                                        <tr>
-                                            <th rowSpan={2}>ID Docente</th>
-                                            <th rowSpan={2}>Nombre</th>
-                                            {/* Cabeceras de semanas dinámicas */}
-                                            {weeksInDisplay.map((weekStart) => {
-                                                const weekEnd = getDaysOfWeek(weekStart)[6].date;
-                                                return (
-                                                    <th key={weekStart} colSpan={7} className="week-header">
-                                                        Semana: {weekStart} a {weekEnd}
-                                                    </th>
-                                                );
-                                            })}
-                                            <th rowSpan={2} className="total-column">Total Rango</th>
-                                        </tr>
-                                        <tr>
-                                            {/* Cabeceras de días dinámicas */}
-                                            {weeksInDisplay.map((weekStart) => (
-                                                <React.Fragment key={`days-${weekStart}`}>
-                                                    {dayNames.map(dayName => (
-                                                        <th key={`${weekStart}-${dayName}`}>{dayName}</th>
-                                                    ))}
-                                                </React.Fragment>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {profesorAttendanceData.map((prof) => (
-                                            <tr key={prof.id}>
-                                                <td>{prof.id}</td>
-                                                <td>{prof.nombre}</td>
-                                                {prof.weeks.map((week, weekIndex) => (
-                                                    <React.Fragment key={`${prof.id}-${week.weekStartDate}`}>
-                                                        {week.days.map((day, dayIndex) => (
-                                                            <td key={`${prof.id}-${day.date}`}>
-                                                                <input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    max="24"
-                                                                    value={day.hours}
-                                                                    onChange={(e) => handleDailyHoursChange(
-                                                                        prof.id,
-                                                                        weekIndex,
-                                                                        dayIndex,
-                                                                        e.target.value
-                                                                    )}
-                                                                    className="daily-hours-input"
-                                                                    disabled={isSaving}
-                                                                />
-                                                            </td>
-                                                        ))}
-                                                        {/* No hay total semanal en la misma celda de entrada para evitar confusión */}
-                                                    </React.Fragment>
-                                                ))}
-                                                {/* Aquí se calculan y muestran los totales semanales como una columna separada por semana */}
-                                                {prof.weeks.map((week, weekIndex) => (
-                                                    <td key={`weekly-total-${prof.id}-${weekIndex}`} className="weekly-total">
-                                                        {week.weeklyTotal}
-                                                    </td>
-                                                ))}
-                                                <td className="range-total">{prof.rangeTotal}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-                    )}
-
-                    {/* --- Vista de Reporte de Asistencia (Resumen Mensual) --- */}
-                    {vistaActual === 'reporte' && (
-                        <div className="asistencia-table-container">
-                            {registrosAsistenciaResumen.length === 0 && !message?.text.includes("Error") && !isLoading && (
-                                <p className="no-data-message">
-                                    No hay registros de reporte de asistencia para mostrar.
-                                </p>
-                            )}
-                            {registrosAsistenciaResumen.length > 0 && (
-                                <table className="asistencia-table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>NOMBRE</th>
-                                            <th>HORAS SEM</th>
-                                            <th>MES</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {registrosAsistenciaResumen.map((registro, index) => (
-                                            <tr key={registro.id + registro.mes + index}> {/* Usar una clave más robusta */}
-                                                <td>{registro.id}</td>
-                                                <td>{registro.nombre}</td>
-                                                <td>{registro.horasSem}</td>
-                                                <td>{registro.mes}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-                    )}
-                </>
-            )}
+      <div className="header-controls">
+        <div className="form-group">
+          <label htmlFor="periodo">Periodo:</label>
+          <select id="periodo" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} disabled={isLoading} className="form-input">
+            <option value="">-- Selecciona Periodo --</option>
+            {periods.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+          </select>
         </div>
-    );
+
+        {viewMode === 'singleProfessorPeriod' && (
+          <div className="form-group">
+            <label htmlFor="empleado">Empleado:</label>
+            <select id="empleado" value={selectedProfessorId} onChange={(e) => setSelectedProfessorId(e.target.value)} disabled={isLoading || mockProfessors.length === 0} className="form-input">
+              <option value="">-- Selecciona Empleado --</option>
+              {mockProfessors.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+            </select>
+          </div>
+        )}
+
+        {viewMode === 'allProfessorsWeek' && (
+          <div className="form-group">
+            <label htmlFor="semanaBulkEdit">Semana para Gestionar:</label>
+            <select 
+              id="semanaBulkEdit" 
+              value={selectedWeekForBulkEditValue} 
+              onChange={(e) => setSelectedWeekForBulkEditValue(e.target.value)} 
+              disabled={isLoading || semanasDelPeriodo.length === 0} 
+              className="form-input"
+            >
+              <option value="">-- Selecciona Semana --</option>
+              {semanasDelPeriodo.map(s => <option key={`${s.inicio}_${s.fin}`} value={`${s.inicio}_${s.fin}`}>{s.label}</option>)}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {message && <div className={`message-box message-${message.type}`}>{message.text}</div>}
+      {isLoading && <p className="loading-text">Cargando datos...</p>}
+
+      {/* --- Single Professor - Period View UI --- */}
+      {viewMode === 'singleProfessorPeriod' && !isLoading && selectedProfessorId && (
+        <>
+          <div className="profesor-info-crud">
+            <h3>{professorDisplayName}</h3>
+            <p>ID: {professorContractId} | Horas Contrato: {professorContractHours}</p>
+          </div>
+          {attendanceGridData.length > 0 ? (
+            <div className="attendance-grid-crud">
+              <table>
+                <thead><tr><th>Semana</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th><th>Domingo</th><th>Total</th></tr></thead>
+                <tbody>
+                  {attendanceGridData.map((wd) => (
+                    <tr key={wd.weekId}>
+                      <td>{wd.weekLabel}</td>
+                      {(Object.keys(wd.days) as Array<keyof DailyHours>).map(day => (
+                        <td key={day}><input type="number" min="0" value={wd.days[day] === 0 ? '' : wd.days[day]} onChange={(e) => handleSingleProfessorHourChange(wd.weekId, day, e.target.value)} className="hour-input" disabled={isLoading}/></td>
+                      ))}
+                      <td>{calculateWeeklyTotal(wd.days)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (<p>No hay semanas para mostrar para el periodo y profesor seleccionado.</p>)}
+          {attendanceGridData.length > 0 && (
+            <div className="summary-and-actions-crud">
+              <div className="summary-totals">
+                <span>Total Horas: {overallTotalHoursForSingleProfessor}</span>
+                <span>Tardanzas: 0</span>
+                <span>Horas a Ingresar: {overallTotalHoursForSingleProfessor}</span>
+              </div>
+              <button onClick={handleSingleProfessorSaveChanges} disabled={isLoading} className="button-primary">Guardar Cambios (Profesor)</button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* --- All Professors - Single Week View UI --- */}
+      {viewMode === 'allProfessorsWeek' && !isLoading && selectedWeekForBulkEditValue && (
+        <>
+          {allProfessorsAttendanceData.length > 0 ? (
+            <div className="attendance-grid-crud">
+               <h4>
+                Editando horas para todos los profesores - Semana: {semanasDelPeriodo.find(s => `${s.inicio}_${s.fin}` === selectedWeekForBulkEditValue)?.label || selectedWeekForBulkEditValue}
+              </h4>
+              <table>
+                <thead><tr><th>Profesor</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th><th>Domingo</th><th>Total Semanal</th></tr></thead>
+                <tbody>
+                  {allProfessorsAttendanceData.map((entry) => (
+                    <tr key={entry.profesorId}>
+                      <td style={{textAlign: 'left'}}>{entry.profesorNombre}</td>
+                      {(Object.keys(entry.days) as Array<keyof DailyHours>).map(day => (
+                        <td key={day}><input type="number" min="0" value={entry.days[day] === 0 ? '' : entry.days[day]} onChange={(e) => handleBulkHourChange(entry.profesorId, day, e.target.value)} className="hour-input" disabled={isLoading}/></td>
+                      ))}
+                      <td>{calculateWeeklyTotal(entry.days)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                 <tfoot>
+                    <tr>
+                        <td colSpan={8} style={{textAlign: 'right', fontWeight:'bold'}}>Total Horas (Todos los Profesores esta Semana):</td>
+                        <td style={{fontWeight:'bold'}}>{totalHoursAllProfessorsThisWeek}</td>
+                    </tr>
+                </tfoot>
+              </table>
+            </div>
+          ) : (<p>Selecciona una semana y asegúrate de que haya profesores cargados.</p>)}
+          {allProfessorsAttendanceData.length > 0 && (
+            <div className="summary-and-actions-crud">
+              <div className="summary-totals">
+                 <span>Total Horas Ingresadas (Esta Semana): {totalHoursAllProfessorsThisWeek}</span>
+              </div>
+              <button onClick={handleBulkSaveChanges} disabled={isLoading} className="button-primary">Guardar Cambios (Semana Completa)</button>
+            </div>
+          )}
+        </>
+      )}
+       {viewMode === 'allProfessorsWeek' && !isLoading && !selectedWeekForBulkEditValue && semanasDelPeriodo.length > 0 && (
+            <p className="info-text">Por favor, selecciona una semana del periodo actual para ver y editar las horas de todos los profesores.</p>
+        )}
+    </div>
+  );
 };
 
 export default AdministrarAsistencia;

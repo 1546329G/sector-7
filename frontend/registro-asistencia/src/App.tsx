@@ -40,6 +40,7 @@ const App: React.FC = () => {
           <Route path="administrar-asistencia" element={<AdministrarAsistencia />} />
           <Route path="administrar-movilidad" element={<AdministrarMovilidad />} />
           <Route path="generar-reporte" element={<GenerarReporte />} />
+          <Route index element={<Navigate to="administrar-asistencia" replace />} />
         </Route>
         <Route
           path="/"
