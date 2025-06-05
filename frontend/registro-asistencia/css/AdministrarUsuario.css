@@ -289,7 +289,12 @@ body {
   border-radius: 15px; /* Bordes redondeados para parecer un badge */
   font-size: 0.85em;
   font-weight: bold;
-  color: var(--color-white);
+
+
+
+
+  
+  
   display: inline-block; /* Asegura que el padding funcione */
   text-align: center;
   min-width: 70px; /* Ancho mínimo para consistencia */

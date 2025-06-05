@@ -1,13 +1,13 @@
-// backend/routes/profesorRoutes.js (AHORA SÍ CON EXPORTACIÓN CORRECTA)
+// backend/api1/routes/profesorRoutes.js
 
 import express from 'express';
-// Asegúrate de que la ruta a db.js es correcta desde la ubicación de este archivo.
-// Si este archivo está en backend/api1/routes/, y db.js está en backend/, la ruta es '../../../db.js'.
-// Si este archivo está en backend/routes/, y db.js está en backend/, la ruta es '../../db.js'.
-// Basado en los errores anteriores, la ruta '../../../db.js' en db.js dentro de horarioFeriadoRoutes.js no funcionaba.
-// El error más reciente de db.js era 'backend/db', lo que sugiere que '../../db.js' es la correcta para ir desde
-// 'backend/api1/routes/' a 'backend/db.js'. ¡Así que la ruta actual '../../db.js' aquí es PROBABLEMENTE CORRECTA!
-import { getDatabasePool } from '../../db.js'; // Esta ruta debería ser correcta si db.js está en backend/db.js
+// Importa la función para obtener el pool de conexiones a la base de datos.
+// Ajusta la ruta si tu archivo db.js (o config/db.js) está en otra ubicación.
+// Por ejemplo, si db.js está directamente en la carpeta 'backend', usarías '../db.js'.
+// Si está en 'backend/config/db.js', usarías '../config/db.js'.
+// Dada la salida de tu consola, '../../db.js' parece ser la correcta
+// si este archivo está en 'backend/api1/routes/'.
+import { getDatabasePool } from '../../db.js'; 
 
 const router = express.Router(); // Usa el Router de Express
 
@@ -16,11 +16,22 @@ let dbPool;
 (async () => {
     try {
         dbPool = await getDatabasePool();
+        console.log('[profesorRoutes] Conexión a la base de datos para profesores establecida.');
     } catch (error) {
-        console.error('No se pudo establecer la conexión a la base de datos para las rutas de profesores. Terminando...', error);
-        process.exit(1);
+        console.error('[profesorRoutes] No se pudo establecer la conexión a la base de datos para las rutas de profesores. Terminando...', error);
+        // Podrías decidir no terminar el proceso aquí si otras partes de la API no dependen de esto.
+        // Pero para funciones críticas de DB, salir es una opción.
+        process.exit(1); 
     }
 })();
+
+// Middleware para verificar la conexión a la base de datos antes de cada ruta
+router.use((req, res, next) => {
+    if (!dbPool) {
+        return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida para profesores.' });
+    }
+    next();
+});
 
 
 // ----------------------------------------------------------------
@@ -29,7 +40,6 @@ let dbPool;
 
 // Ruta para obtener todos los profesores
 router.get('/profesores', async (req, res) => {
-    if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     let connection;
     try {
         connection = await dbPool.getConnection();
@@ -45,7 +55,6 @@ router.get('/profesores', async (req, res) => {
 
 // Ruta para buscar profesores por ID o nombre
 router.get('/profesores/buscar', async (req, res) => {
-    if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const searchTerm = req.query.q;
 
     if (!searchTerm) {
@@ -63,7 +72,7 @@ router.get('/profesores/buscar', async (req, res) => {
 
         if (rows.length === 0) {
             return res.status(404).json({ message: 'No se encontraron profesores con ese término de búsqueda.' });
-        }
+        } 
 
         res.json(rows);
     } catch (error) {
@@ -76,7 +85,6 @@ router.get('/profesores/buscar', async (req, res) => {
 
 // Ruta para obtener un profesor por ID
 router.get('/profesores/:id', async (req, res) => {
-    if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { id } = req.params;
     let connection;
     try {
@@ -96,13 +104,17 @@ router.get('/profesores/:id', async (req, res) => {
 
 // Ruta para insertar un nuevo profesor
 router.post('/profesores', async (req, res) => {
-    if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { nombre, horas_segun_contrato, estado, id_institucional } = req.body;
     const fecha_registro = new Date().toISOString().slice(0, 10);
-    const fecha_modificacion = fecha_registro;
+    const fecha_modificacion = fecha_registro; // Inicialmente, la fecha de modificación es la misma que la de registro
 
-    if (!nombre || !id_institucional) {
-        return res.status(400).json({ message: 'El nombre y el ID Institucional del profesor son obligatorios.' });
+    if (!nombre || !id_institucional || horas_segun_contrato === undefined) { // Asegúrate de que horas_segun_contrato no sea undefined
+        return res.status(400).json({ message: 'El nombre, ID Institucional y Horas Contrato del profesor son obligatorios.' });
+    }
+
+    // Validación de estado si se envía
+    if (estado && !['Activo', 'Inactivo'].includes(estado)) {
+        return res.status(400).json({ message: 'El estado debe ser "Activo" o "Inactivo".' });
     }
 
     let connection;
@@ -110,7 +122,7 @@ router.post('/profesores', async (req, res) => {
         connection = await dbPool.getConnection();
         const [result] = await connection.execute(
             'INSERT INTO profesor (nombre, horas_segun_contrato, estado, id_institucional, fecha_registro, fecha_modificacion) VALUES (?, ?, ?, ?, ?, ?)',
-            [nombre, horas_segun_contrato, estado, id_institucional, fecha_registro, fecha_modificacion]
+            [nombre, horas_segun_contrato, estado || 'Activo', id_institucional, fecha_registro, fecha_modificacion] // Si estado no se envía, por defecto 'Activo'
         );
         res.status(201).json({ message: 'Profesor insertado con éxito', id: result.insertId, affectedRows: result.affectedRows });
     } catch (error) {
@@ -124,24 +136,62 @@ router.post('/profesores', async (req, res) => {
     }
 });
 
-// Ruta para actualizar un profesor
+// Ruta para actualizar un profesor (IMPLEMENTACIÓN DINÁMICA - OPCIÓN 1)
 router.put('/profesores/:id', async (req, res) => {
-    if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { id } = req.params;
-    const { nombre, horas_segun_contrato, estado, id_institucional } = req.body;
-    const fecha_modificacion = new Date().toISOString().slice(0, 10);
+    const updates = req.body; // Captura todo el cuerpo de la solicitud
 
-    if (!nombre && !horas_segun_contrato && !estado && !id_institucional) {
-        return res.status(400).json({ message: 'Se requiere al menos un campo (nombre, horas_segun_contrato, estado, o id_institucional) para actualizar.' });
+    if (Object.keys(updates).length === 0) {
+        return res.status(400).json({ message: 'Se requiere al menos un campo para actualizar (nombre, horas_segun_contrato, estado, id_institucional).' });
     }
 
     let connection;
     try {
         connection = await dbPool.getConnection();
-        const [result] = await connection.execute(
-            'UPDATE profesor SET nombre = ?, horas_segun_contrato = ?, estado = ?, id_institucional = ?, fecha_modificacion = ? WHERE id = ?',
-            [nombre, horas_segun_contrato, estado, id_institucional, fecha_modificacion, id]
-        );
+
+        const setClauses = [];
+        const params = [];
+
+        // Construye dinámicamente la parte SET de la consulta
+        for (const key in updates) {
+            if (updates.hasOwnProperty(key)) {
+                // Validación específica para el campo 'estado'
+                if (key === 'estado') {
+                    if (!['Activo', 'Inactivo'].includes(updates[key])) {
+                        connection.release();
+                        return res.status(400).json({ message: 'El estado debe ser "Activo" o "Inactivo".' });
+                    }
+                    setClauses.push(`${key} = ?`);
+                    params.push(updates[key]);
+                } 
+                // Si tienes un campo 'horario' que se guarda como JSON string (si lo añades en el futuro)
+                else if (key === 'horario') {
+                    setClauses.push(`${key} = ?`);
+                    // Asegúrate de que horario sea un array o null para JSON.stringify
+                    params.push(updates[key] === null ? null : JSON.stringify(updates[key]));
+                } 
+                // Manejar otros campos
+                else {
+                    setClauses.push(`${key} = ?`);
+                    // Importante: Si un campo puede ser null en la DB, y el frontend lo envía como null (no undefined),
+                    // asegúrate de que se pase null. Si el frontend envía undefined, convertir a null si la DB lo permite.
+                    params.push(updates[key] === undefined ? null : updates[key]);
+                }
+            }
+        }
+
+        // Siempre actualiza la fecha_modificacion al final
+        setClauses.push('fecha_modificacion = ?');
+        params.push(new Date().toISOString().slice(0, 10));
+
+        // Construye la consulta final
+        const query = `UPDATE profesor SET ${setClauses.join(', ')} WHERE id = ?`;
+        params.push(id); // Añade el ID al final de los parámetros
+
+        console.log('[DEBUG] UPDATE Query:', query);
+        console.log('[DEBUG] UPDATE Parameters:', params);
+
+        const [result] = await connection.execute(query, params);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Profesor no encontrado para actualizar.' });
@@ -160,7 +210,6 @@ router.put('/profesores/:id', async (req, res) => {
 
 // Ruta para eliminar un profesor
 router.delete('/profesores/:id', async (req, res) => {
-    if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { id } = req.params;
     let connection;
     try {
@@ -179,4 +228,4 @@ router.delete('/profesores/:id', async (req, res) => {
     }
 });
 
-export default router; // <-- ¡ESTO ES LO QUE DEBE ESTAR!
+export default router; // Exporta el router para que pueda ser usado en tu app principal
