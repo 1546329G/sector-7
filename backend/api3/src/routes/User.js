@@ -1,6 +1,9 @@
 import express from 'express';
+const express = require('express');
 const { pool } = require('../config/db');
 const { pool } = require('../../../db');
+const userController = require('../controllers/userController');
+const { verifyToken, authorizeRole } = require('../middleware/authMiddleware');
 import pool from '../../../db.js';import authenticateToken from '../middleware/authMiddleware.js';
 import authorizeRoles from '../middleware/authorizeRoles.js';
 

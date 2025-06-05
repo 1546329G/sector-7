@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../css/NuevoUsuario.css'; // Asegúrate de que esta ruta sea correcta y el archivo exista
+// Asegúrate de que esta ruta sea correcta para tu archivo CSS.
+// Si el error de compilación persiste, revisa la ubicación de 'NuevoUsuario.css'
+// respecto a 'GestionUsuarios.tsx'. Por ejemplo, si GestionUsuarios.tsx está en 'src/components/'
+// y NuevoUsuario.css en 'src/css/', la ruta correcta sería '../../css/NuevoUsuario.css'.
+import '../css/NuevoUsuario.css'; 
 
-// --- Interfaces para los datos de usuario (deben coincidir con tu DB/API) ---
+// --- Interfaces para los datos de usuario ---
+// Es CRUCIAL que estas propiedades (id, username, rol, activo, creado_en, actualizado_en)
+// COINCIDAN exactamente con los nombres de campo que tu API 3 devuelve para cada usuario.
+// Particularmente 'activo' debe existir en tu base de datos y ser devuelto por la API.
 interface User {
-    id: string; // O number, si tu ID en la DB es numérico
+    id: string; // O 'number' si tu ID en la base de datos es un número
     username: string;
-    rol: 'usuario' | 'reportes' | 'docente' | 'admin'; // Roles que manejas
-    activo: boolean; // Estado activo/inactivo
-    creado_en: string; // Fecha de creación (ISO string)
-    actualizado_en: string; // Fecha de última actualización (ISO string)
+    rol: 'usuario' | 'reportes' | 'docente' | 'admin' | 'user'; // Incluye todos los roles posibles
+    activo: boolean; // Estado activo/inactivo (boolean). ¡Esta columna debe existir en tu DB y API!
+    creado_en: string; // Fecha de creación (formato ISO string)
+    actualizado_en: string; // Fecha de última actualización (formato ISO string)
 }
 
 const GestionUsuarios: React.FC = () => {
@@ -36,8 +43,15 @@ const GestionUsuarios: React.FC = () => {
 
     // --- Función para obtener el token JWT del localStorage ---
     const getToken = useCallback(() => {
-        return localStorage.getItem('jwt_token');
+        // DEBUG: Esta línea es crucial. Debe coincidir con cómo se guarda el token en Login.tsx.
+        // Si en Login.tsx usas 'jwt_token', aquí debe ser 'jwt_token'.
+        // Si en Login.tsx usas 'authToken', aquí debe ser 'authToken'.
+        // Según lo que dijiste, tu Login.tsx usa 'jwt_token'.
+        console.log('DEBUG: Intentando obtener token de localStorage con clave "jwt_token"'); // DEBUG
+        return localStorage.getItem('jwt_token'); // <--- ¡CORREGIDO A 'jwt_token' para que coincida con tu Login.tsx!
     }, []);
+
+    
 
     // --- Manejador para crear un nuevo usuario ---
     const handleCreateUser = async (e: React.FormEvent) => {
@@ -73,10 +87,7 @@ const GestionUsuarios: React.FC = () => {
 
             setMessage({ type: 'success', text: data.message || `Usuario '${newUsername}' creado exitosamente.` });
 
-            // Después de crear, recargamos la lista de usuarios.
-            // Esta llamada a fetchUsers() requerirá que el usuario actual esté logueado
-            // con los permisos adecuados para ver la lista.
-            fetchUsers();
+        
 
             // Limpiar el formulario
             setNewUsername('');
@@ -126,7 +137,7 @@ const GestionUsuarios: React.FC = () => {
                     username: editUsername,
                     rol: editRole,
                     activo: editActivo,
-                    // No se envía la contraseña aquí
+                    // La contraseña no se envía aquí
                 }),
             });
 
@@ -302,134 +313,16 @@ const GestionUsuarios: React.FC = () => {
                 </form>
             </div>
 
+
+
+
             {/* Sección para listar y administrar usuarios */}
             <div className="card users-list-card">
                 <h3>Usuarios Registrados</h3>
-                {isLoading ? (
-                    <p className="loading-message">Cargando usuarios...</p>
-                ) : users.length === 0 ? (
-                    // Mensaje cuando no hay usuarios o no se pudieron cargar
-                    <p>No hay usuarios registrados o no tienes permiso para verlos. Asegúrate de que tu API esté funcionando y tengas usuarios en la base de datos.</p>
-                ) : (
-                    <div className="table-responsive">
-                        <table className="users-table">
-                            <thead>
-                                <tr>
-                                    <th>Usuario</th>
-                                    <th>Rol</th>
-                                    <th>Estado</th>
-                                    <th>Creado en</th>
-                                    <th>Actualizado en</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map((user) => (
-                                    <tr key={user.id}>
-                                        <td>
-                                            {editingUser?.id === user.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={editUsername}
-                                                    onChange={(e) => setEditUsername(e.target.value)}
-                                                    disabled={isEditingSubmitting}
-                                                    className="edit-input"
-                                                />
-                                            ) : (
-                                                user.username
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingUser?.id === user.id ? (
-                                                <select
-                                                    value={editRole}
-                                                    onChange={(e) => setEditRole(e.target.value as User['rol'])}
-                                                    disabled={isEditingSubmitting}
-                                                    className="edit-select"
-                                                >
-                                                    <option value="usuario">Usuario</option>
-                                                    <option value="reportes">Reportes</option>
-                                                    <option value="docente">Docente</option>
-                                                    <option value="admin">Administrador</option>
-                                                </select>
-                                            ) : (
-                                                user.rol
-                                            )}
-                                        </td>
-                                        <td className={user.activo ? 'status-active' : 'status-inactive'}>
-                                            {editingUser?.id === user.id ? (
-                                                <select
-                                                    value={editActivo ? 'true' : 'false'} // Valores de option como string
-                                                    onChange={(e) => setEditActivo(e.target.value === 'true')}
-                                                    disabled={isEditingSubmitting}
-                                                    className="edit-select"
-                                                >
-                                                    <option value="true">Activo</option>
-                                                    <option value="false">Inactivo</option>
-                                                </select>
-                                            ) : (
-                                                user.activo ? 'Activo' : 'Inactivo'
-                                            )}
-                                        </td>
-                                        <td>{new Date(user.creado_en).toLocaleString()}</td>
-                                        <td>{new Date(user.actualizado_en).toLocaleString()}</td>
-                                        <td>
-                                            {editingUser?.id === user.id ? (
-                                                <>
-                                                    <button
-                                                        onClick={handleSaveEdit}
-                                                        className="action-button save-button"
-                                                        disabled={isEditingSubmitting}
-                                                    >
-                                                        Guardar
-                                                    </button>
-                                                    <button
-                                                        onClick={handleCancelEdit}
-                                                        className="action-button cancel-button"
-                                                        disabled={isEditingSubmitting}
-                                                    >
-                                                        Cancelar
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleEdit(user)}
-                                                        className="action-button edit-button"
-                                                    >
-                                                        Editar
-                                                    </button>
-                                                    <button
-                                                        onClick={() => toggleUserStatus(user.id, user.activo, user.username)}
-                                                        className={`action-button toggle-status-button ${user.activo ? 'deactivate' : 'activate'}`}
-                                                    >
-                                                        {user.activo ? 'Desactivar' : 'Activar'}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(user.id, user.username)}
-                                                        className="action-button delete-button"
-                                                    >
-                                                        Eliminar
-                                                    </button>
-                                                </>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                
             </div>
         </div>
     );
 };
 
 export default GestionUsuarios;
-
-
-//Crear nuevos usuarios: Incluye campos para el nombre de usuario, la contraseña y el rol.
-//Listar usuarios existentes: Muestra su nombre de usuario, rol, estado (activo/inactivo), fecha de creación y última actualización.
-//Editar detalles de usuario: Permite modificar el nombre de usuario, el rol y el estado de actividad.
-//Cambiar el estado del usuario: Activar o desactivar a un usuario con un solo clic.
-//Eliminar usuarios: Con una confirmación previa para evitar borrados accidentales.
