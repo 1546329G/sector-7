@@ -22,9 +22,25 @@ const portApi3 = process.env.PORT_API3 || 5010; // Intenta PORT_API3, luego 5010
 
 // Iniciar la API de Profesores/Asistencias (API 1)
 
+import express from 'express';
+import reporteRoutes from './routes/reporte.js';
+import periodoRoutes from './routes/periodos.js';
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 
+app.get('/', (req, res) => {
+  res.send('Hola!');
+});
 
+app.use(express.json());
+app.use('/',reporteRoutes);
+app.use('/',periodoRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+});
 //-----------------------------------
 //-----------------------------------
 // --- INICIO DE api1 ---
