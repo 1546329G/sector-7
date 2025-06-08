@@ -7,7 +7,8 @@ import AdministrarUsuario from '../components/AdministrarUsuario';
 import AdministrarAsistencia from '../components/AdministrarAsistencia';
 import AdministrarMovilidad from '../components/AdministrarMovilidad';
 import GenerarReporte from '../components/GenerarReporte';
-
+import AdministrarHorario from '../components/AdministrarHorario';
+import ImportarExcel from '../components/ImportarExcel';
 
 
 const App: React.FC = () => {
@@ -35,11 +36,12 @@ const App: React.FC = () => {
         >
 
           <Route path="nuevo-usuario" element={<NuevoUsuario />} />
-          <Route path="administrar-usuario" element={<AdministrarUsuario />} />
-     
+          <Route path="administrar-usuario" element={<AdministrarUsuario />} />    
           <Route path="administrar-asistencia" element={<AdministrarAsistencia />} />
           <Route path="administrar-movilidad" element={<AdministrarMovilidad />} />
           <Route path="generar-reporte" element={<GenerarReporte />} />
+          <Route path="administrar-horario" element={<AdministrarHorario/>} />
+          <Route path="importar-excel" element={<ImportarExcel/>} />
           <Route index element={<Navigate to="administrar-asistencia" replace />} />
         </Route>
         <Route

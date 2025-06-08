@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../css/AdministrarAsistencia.css'; // Ensure this CSS file is adapted or created
+import '../css/AdministrarAsistencia.css'; 
 
-// --- Interfaces ---
 interface Periodo {
   value: string;
   label: string;
