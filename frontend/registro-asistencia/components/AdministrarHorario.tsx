@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import '../css/AdministrarHorario.css'; // Asegúrate de crear este archivo CSS
+import '../css/AdministrarHorario.css'; 
 
 // Define las URLs base de tus APIs
-const API_HORARIOS_URL = 'http://localhost:5011/api/horarios'; // <-- URL para la API 2 (Horarios)
-const API_PROFESORES_URL = 'http://localhost:5009/profesores'; // <-- URL para la API 1 (Profesores)
+const API_HORARIOS_URL = 'http://localhost:5011/api/horarios'; 
+const API_PROFESORES_URL = 'http://localhost:5009/profesores';
 
 // Interfaz para un objeto Horario
 interface Horario {
@@ -66,12 +66,11 @@ const GestionHorarios: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [profesores]); // Depende de profesores para poder asignar los nombres
+  }, [profesores]); 
 
   // Función para obtener la lista de profesores activos (desde API 1)
   const fetchProfesores = useCallback(async () => {
     try {
-      // Obtenemos solo profesores activos para asignación de horarios desde la API 1
       const response = await axios.get<ProfesorSimple[]>(`${API_PROFESORES_URL}?estado=Activo`);
       setProfesores(response.data);
     } catch (error) {
@@ -82,14 +81,20 @@ const GestionHorarios: React.FC = () => {
 
   // Efecto para cargar profesores y horarios al inicio
   useEffect(() => {
-    // Primero cargamos los profesores
     fetchProfesores().then(() => {
-      // Una vez cargados los profesores, cargamos los horarios
-      // (Esto asegura que 'profesores' esté disponible para 'fetchHorarios')
+
       fetchHorarios();
     });
-  }, [fetchProfesores, fetchHorarios]); // Asegúrate de que las dependencias sean correctas
+  }, [fetchProfesores, fetchHorarios]);
 
+
+
+
+
+
+
+
+  //==================================================0
   // Manejador para añadir un nuevo horario (a la API 2)
   const handleAddHorario = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,12 +123,12 @@ const GestionHorarios: React.FC = () => {
       };
 
       // Ruta completa para añadir horario en API 2
-      await axios.post(API_HORARIOS_URL, newHorarioData); // <-- Apuntando a la API 2
+      await axios.post(API_HORARIOS_URL, newHorarioData); //  Apuntando a la api2
 
       setAddMessage({ type: 'success', text: `Horario añadido exitosamente!` });
       setMainMessage({ type: 'success', text: `Nuevo horario añadido.` });
 
-      fetchHorarios(); // Recargar la lista para incluir el nuevo horario
+      fetchHorarios(); 
 
       // Limpiar campos del formulario
       setNewProfesorId('');
@@ -158,8 +163,7 @@ const GestionHorarios: React.FC = () => {
     }
     setMainMessage(null);
     try {
-      // Ruta completa para eliminar horario en API 2
-      await axios.delete(`${API_HORARIOS_URL}/${horarioId}`); // <-- Apuntando a la API 2
+      await axios.delete(`${API_HORARIOS_URL}/${horarioId}`); 
 
       // Actualizar el estado local para reflejar la eliminación
       setHorarios(prevHorarios => prevHorarios.filter(h => h.id !== horarioId));
@@ -187,7 +191,15 @@ const GestionHorarios: React.FC = () => {
         </p>
       )}
 
-      {/* Sección para añadir nuevo horario */}
+
+
+
+      //=====================================000
+      /* Sección para añadir nuevo horario */
+      //=======================================0
+
+
+
       <div className="generar-horario-container">
         <h2 className="generar-horario-title">Añadir Nuevo Horario</h2>
         <form onSubmit={handleAddHorario} className="generar-horario-form">
@@ -247,7 +259,7 @@ const GestionHorarios: React.FC = () => {
         )}
       </div>
 
-      {/* Sección para administrar horarios existentes */}
+      /* Sección para administrar horarios existentes */
       <div className="administrar-horario-container">
         <h2 className="administrar-horario-title">Administrar Horarios Existentes</h2>
         <button onClick={fetchHorarios} disabled={isLoading} className="refresh-button">
