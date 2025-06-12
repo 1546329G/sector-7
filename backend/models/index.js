@@ -3,12 +3,19 @@ import ProfesorModel from './Profesor.js';
 import AsistenciaModel from './Asistencia.js';
 import HorarioModel from './Horario.js';
 
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
 
-const sequelize = new Sequelize('railway', 'root', 'DGiFGWeayPZVQGshUykwPIRDnXifBSsd', {
-  host: 'shuttle.proxy.rlwy.net',
-  port: 20748,
-  dialect: 'mysql'
-});
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: 'mysql'
+  }
+);
 
 const db = {};
 

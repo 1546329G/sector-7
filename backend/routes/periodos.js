@@ -20,6 +20,8 @@ dayjs.extend(isSameOrBefore);
 
 router.get('/reporte-asistencia/periodos', async (req, res) => {
   try {
+    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
     const fechas = await Asistencia.findAll({
       attributes: [
         [Asistencia.sequelize.fn('MIN', Asistencia.sequelize.col('fecha')), 'minFecha'],
@@ -35,18 +37,15 @@ router.get('/reporte-asistencia/periodos', async (req, res) => {
       return res.status(404).json({ error: 'No hay registros de asistencia' });
     }
 
-    // Ajustar al primer 20 del mes igual o anterior
     let inicio = minFecha.date() < 20
       ? minFecha.date(20)
       : minFecha.add(1, 'month').date(20);
     inicio = inicio.date(20);
 
-    // Ajustar al último 19 posterior o igual a maxFecha
     let fin = maxFecha.date() >= 20
       ? maxFecha.add(1, 'month').date(19)
       : maxFecha.date(19);
 
-    // Generar períodos
     const periodos = [];
 
     while (inicio.isBefore(fin) || inicio.isSame(fin)) {
@@ -54,20 +53,19 @@ router.get('/reporte-asistencia/periodos', async (req, res) => {
       periodos.push({
         inicio: inicio.format('YYYY-MM-DD'),
         fin: finPeriodo.format('YYYY-MM-DD'),
-        etiqueta: `${inicio.format('MMM')} - ${finPeriodo.format('MMM')}`
+        etiqueta: `${capitalize(inicio.format('MMM'))} - ${capitalize(finPeriodo.format('MMM'))} ${finPeriodo.format('YYYY')}`
       });
 
-      inicio = inicio.add(1, 'month').date(20); // próximo 20
+      inicio = inicio.add(1, 'month').date(20);
     }
 
-    // Agregar 6 períodos futuros
     for (let i = 0; i < 6; i++) {
       const inicioFuturo = inicio;
       const finFuturo = inicioFuturo.add(1, 'month').date(19);
       periodos.push({
         inicio: inicioFuturo.format('YYYY-MM-DD'),
         fin: finFuturo.format('YYYY-MM-DD'),
-        etiqueta: `${inicioFuturo.format('MMM')} - ${finFuturo.format('MMM')}`
+        etiqueta: `${capitalize(inicioFuturo.format('MMM'))} - ${capitalize(finFuturo.format('MMM'))} ${finFuturo.format('YYYY')}`
       });
 
       inicio = inicio.add(1, 'month').date(20);
@@ -79,7 +77,6 @@ router.get('/reporte-asistencia/periodos', async (req, res) => {
     res.status(500).json({ error: 'Error generando períodos disponibles' });
   }
 });
-
 
 router.get('/reporte-asistencia/semanas', (req, res) => {
   const { periodo } = req.query;

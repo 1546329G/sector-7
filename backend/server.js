@@ -25,6 +25,7 @@ const portApi3 = process.env.PORT_API3 || 5010; // Intenta PORT_API3, luego 5010
 import express from 'express';
 import reporteRoutes from './routes/reporte.js';
 import periodoRoutes from './routes/periodos.js';
+import saveRoutes from './routes/save.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 app.use(express.json());
 app.use('/',reporteRoutes);
 app.use('/',periodoRoutes);
+app.use('/',saveRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
