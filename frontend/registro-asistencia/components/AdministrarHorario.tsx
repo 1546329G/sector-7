@@ -3,7 +3,7 @@ import axios from 'axios';
 import '../css/AdministrarHorario.css'; // Asegúrate de crear este archivo CSS
 
 // Define las URLs base de tus APIs
-const API_HORARIOS_URL = 'http://localhost:3711/api/horarios'; // <-- URL para la API 2 (Horarios)
+const API_HORARIOS_URL = 'http://localhost:5011/api/horarios'; // <-- URL para la API 2 (Horarios)
 const API_PROFESORES_URL = 'http://localhost:5009/profesores'; // <-- URL para la API 1 (Profesores)
 
 // Interfaz para un objeto Horario
