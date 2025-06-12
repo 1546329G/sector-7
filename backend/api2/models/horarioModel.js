@@ -9,7 +9,7 @@
 
 
 
-import { getDatabasePool } from '../../db.js'; // Asegúrate de que la ruta sea correcta
+import { getDatabasePool } from '../../db.js';
 
 const HorarioModel = {
     getAll: async () => {

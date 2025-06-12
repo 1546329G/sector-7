@@ -3,7 +3,12 @@
 
 
 
-import { getDatabasePool } from '../../db.js'; // Asegúrate de que la ruta sea correcta
+
+
+
+
+
+import { getDatabasePool } from '../../db.js';
 
 // Obtener todos los horarios
 export const getHorarios = async (req, res) => {
