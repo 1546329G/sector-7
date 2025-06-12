@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../css/AdministrarHorario.css'; // Asegúrate de crear este archivo CSS
 
-// Define la URL base de tu API en el puerto 5009
-const API_BASE_URL = 'http://localhost:5009';
+// Define las URLs base de tus APIs
+const API_HORARIOS_URL = 'http://localhost:3711/api/horarios'; // <-- URL para la API 2 (Horarios)
+const API_PROFESORES_URL = 'http://localhost:5009/profesores'; // <-- URL para la API 1 (Profesores)
 
 // Interfaz para un objeto Horario
 interface Horario {
@@ -39,28 +40,39 @@ const GestionHorarios: React.FC = () => {
   const [addMessage, setAddMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  // Función para obtener la lista de horarios desde la API
+  // Función para obtener la lista de horarios desde la API 2
   const fetchHorarios = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      // Ruta completa para obtener horarios
-      const response = await axios.get<Horario[]>(`${API_BASE_URL}/horarios`);
-      setHorarios(response.data);
+      // Usamos la nueva URL para la API de Horarios (API 2)
+      const response = await axios.get<Horario[]>(API_HORARIOS_URL);
+      const fetchedHorarios = response.data;
+
+      // Mapear los nombres de profesores a los horarios
+      const horariosConNombres = fetchedHorarios.map(horario => {
+        const profesor = profesores.find(p => p.id === horario.profesor_id);
+        return {
+          ...horario,
+          profesor_nombre: profesor ? profesor.nombre : `ID: ${horario.profesor_id}`
+        };
+      });
+      setHorarios(horariosConNombres);
+
     } catch (error) {
       console.error('Error al obtener horarios:', error);
-      setErrorMessage('Error al cargar los horarios. Asegúrese de que el servidor y la ruta "/horarios" estén disponibles.');
+      setErrorMessage('Error al cargar los horarios. Asegúrese de que el servidor y la ruta "/api/horarios" de la API 2 estén disponibles.');
       setMainMessage({ type: 'error', text: 'Error al cargar los horarios.' });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [profesores]); // Depende de profesores para poder asignar los nombres
 
-  // Función para obtener la lista de profesores activos
+  // Función para obtener la lista de profesores activos (desde API 1)
   const fetchProfesores = useCallback(async () => {
     try {
-        // Obtenemos solo profesores activos para asignación de horarios
-      const response = await axios.get<ProfesorSimple[]>(`${API_BASE_URL}/profesores?estado=Activo`);
+      // Obtenemos solo profesores activos para asignación de horarios desde la API 1
+      const response = await axios.get<ProfesorSimple[]>(`${API_PROFESORES_URL}?estado=Activo`);
       setProfesores(response.data);
     } catch (error) {
       console.error('Error al obtener profesores:', error);
@@ -68,12 +80,17 @@ const GestionHorarios: React.FC = () => {
     }
   }, []);
 
+  // Efecto para cargar profesores y horarios al inicio
   useEffect(() => {
-    fetchHorarios();
-    fetchProfesores();
-  }, [fetchHorarios, fetchProfesores]);
+    // Primero cargamos los profesores
+    fetchProfesores().then(() => {
+      // Una vez cargados los profesores, cargamos los horarios
+      // (Esto asegura que 'profesores' esté disponible para 'fetchHorarios')
+      fetchHorarios();
+    });
+  }, [fetchProfesores, fetchHorarios]); // Asegúrate de que las dependencias sean correctas
 
-  // Manejador para añadir un nuevo horario
+  // Manejador para añadir un nuevo horario (a la API 2)
   const handleAddHorario = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddMessage(null);
@@ -86,9 +103,9 @@ const GestionHorarios: React.FC = () => {
     }
 
     if (newHoraInicio >= newHoraFin) {
-        setAddMessage({ type: 'error', text: 'La hora de fin debe ser posterior a la hora de inicio.' });
-        setIsAdding(false);
-        return;
+      setAddMessage({ type: 'error', text: 'La hora de fin debe ser posterior a la hora de inicio.' });
+      setIsAdding(false);
+      return;
     }
 
     try {
@@ -100,13 +117,13 @@ const GestionHorarios: React.FC = () => {
         aula: newAula,
       };
 
-      // Ruta completa para añadir horario
-      await axios.post(`${API_BASE_URL}/horarios`, newHorarioData);
-      
+      // Ruta completa para añadir horario en API 2
+      await axios.post(API_HORARIOS_URL, newHorarioData); // <-- Apuntando a la API 2
+
       setAddMessage({ type: 'success', text: `Horario añadido exitosamente!` });
       setMainMessage({ type: 'success', text: `Nuevo horario añadido.` });
 
-      fetchHorarios(); // Recargar la lista
+      fetchHorarios(); // Recargar la lista para incluir el nuevo horario
 
       // Limpiar campos del formulario
       setNewProfesorId('');
@@ -134,29 +151,29 @@ const GestionHorarios: React.FC = () => {
     }
   };
 
-  // Manejador para eliminar un horario
+  // Manejador para eliminar un horario (en la API 2)
   const handleDeleteHorario = async (horarioId: string) => {
     if (!window.confirm(`¿Estás seguro de que deseas eliminar el horario con ID ${horarioId}?`)) {
-        return;
+      return;
     }
     setMainMessage(null);
     try {
-        // Ruta completa para eliminar horario
-        await axios.delete(`${API_BASE_URL}/horarios/${horarioId}`);
-        
-        // Actualizar el estado local para reflejar la eliminación
-        setHorarios(prevHorarios => prevHorarios.filter(h => h.id !== horarioId));
-        setMainMessage({ type: 'success', text: `Horario ${horarioId} eliminado exitosamente.` });
+      // Ruta completa para eliminar horario en API 2
+      await axios.delete(`${API_HORARIOS_URL}/${horarioId}`); // <-- Apuntando a la API 2
+
+      // Actualizar el estado local para reflejar la eliminación
+      setHorarios(prevHorarios => prevHorarios.filter(h => h.id !== horarioId));
+      setMainMessage({ type: 'success', text: `Horario ${horarioId} eliminado exitosamente.` });
 
     } catch (error: any) {
-        console.error('Error al eliminar horario:', error.response?.data || error.message);
-        let errorText = 'Error al eliminar el horario.';
-        if (error.response?.status === 404) {
-            errorText = `Error: Horario no encontrado.`;
-        }
-        setMainMessage({ type: 'error', text: errorText });
+      console.error('Error al eliminar horario:', error.response?.data || error.message);
+      let errorText = 'Error al eliminar el horario.';
+      if (error.response?.status === 404) {
+        errorText = `Error: Horario no encontrado.`;
+      }
+      setMainMessage({ type: 'error', text: errorText });
     } finally {
-        setTimeout(() => setMainMessage(null), 3000);
+      setTimeout(() => setMainMessage(null), 3000);
     }
   };
 

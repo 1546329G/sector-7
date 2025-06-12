@@ -1,4 +1,4 @@
-// backend/db.js (FINALMENTE CORRECTO COMO ES MODULE)
+// backend/db.js
 
 import mysql from 'mysql2/promise'; // <-- ¡Cambio aquí!
 
@@ -42,5 +42,3 @@ export async function getDatabasePool() { // <-- ¡Cambio aquí! 'export'
         process.exit(1);
     }
 }
-
-// <-- Elimina la línea 'module.exports = { getDatabasePool };'
