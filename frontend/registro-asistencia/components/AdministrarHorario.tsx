@@ -193,13 +193,13 @@ const GestionHorarios: React.FC = () => {
 
 
 
+{
+      //=====================================
+      // Sección para añadir nuevo horario 
+      //=======================================
 
-      //=====================================000
-      /* Sección para añadir nuevo horario */
-      //=======================================0
 
-
-
+}
       <div className="generar-horario-container">
         <h2 className="generar-horario-title">Añadir Nuevo Horario</h2>
         <form onSubmit={handleAddHorario} className="generar-horario-form">
@@ -259,7 +259,7 @@ const GestionHorarios: React.FC = () => {
         )}
       </div>
 
-      /* Sección para administrar horarios existentes */
+     { /* Sección para administrar horarios existentes */}
       <div className="administrar-horario-container">
         <h2 className="administrar-horario-title">Administrar Horarios Existentes</h2>
         <button onClick={fetchHorarios} disabled={isLoading} className="refresh-button">
