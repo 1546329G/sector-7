@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../css/AdministrarAsistencia.css'; // Ensure this CSS file is adapted or created
+import dayjs from 'dayjs';
 
 // --- Interfaces ---
 interface Periodo {
@@ -47,74 +48,8 @@ interface AllProfessorsWeeklyEntry {
 
 type ViewMode = 'singleProfessorPeriod' | 'allProfessorsWeek';
 
-// --- Mock Data & Helpers (mostly same as before) ---
-const formatDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+let mockProfessors: Professor[] = [
 
-const generateMockPeriods = (): Periodo[] => {
-  const currentYear = new Date().getFullYear();
-  const periods: Periodo[] = [];
-  const monthNames = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-  for (let i = 1; i <= 3; i++) {
-    const startMonthIndex = i * 2 - 1;
-    const endMonthIndex = startMonthIndex + 1;
-    if (startMonthIndex >= 12 || endMonthIndex >= 12) break;
-    const startDate = new Date(currentYear, startMonthIndex, 1);
-    const endDate = new Date(currentYear, endMonthIndex + 1, 0);
-    const value = `${formatDate(startDate)}_${formatDate(endDate)}`;
-    const label = `${monthNames[startMonthIndex]} - ${monthNames[endMonthIndex]} ${currentYear}`;
-    periods.push({ value, label });
-  }
-  periods.unshift({
-    value: `2024-02-01_2024-03-31`,
-    label: "FEBRERO - MARZO 2024"
-  });
-  return periods;
-};
-
-const generateMockSemanasForPeriod = (periodoValue: string): Semana[] => {
-  if (!periodoValue) return [];
-  const [startPeriodStr, endPeriodStr] = periodoValue.split('_');
-  const startPeriod = new Date(startPeriodStr + 'T00:00:00');
-  const endPeriod = new Date(endPeriodStr + 'T00:00:00');
-  const semanas: Semana[] = [];
-  let currentWeekStart = new Date(startPeriod);
-  let weekCounter = 1;
-  const dayOfWeek = currentWeekStart.getDay();
-  if (dayOfWeek === 0) {
-    currentWeekStart.setDate(currentWeekStart.getDate() + 1);
-  } else if (dayOfWeek > 1) {
-    currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek - 1));
-  }
-  while (currentWeekStart <= endPeriod) {
-    const currentWeekEnd = new Date(currentWeekStart);
-    currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
-    const displayWeekEnd = new Date(Math.min(currentWeekEnd.getTime(), endPeriod.getTime()));
-    const formatShortDate = (d: Date) => `${String(d.getDate()).padStart(2, '0')} ${d.toLocaleString('es-ES', { month: 'short' }).toUpperCase().replace('.', '')}`;
-    const label = `Semana ${weekCounter}: ${formatShortDate(currentWeekStart)} - ${formatShortDate(displayWeekEnd)}`;
-    semanas.push({
-      inicio: formatDate(currentWeekStart),
-      fin: formatDate(currentWeekEnd),
-      label: label,
-    });
-    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-    weekCounter++;
-     if (currentWeekStart > endPeriod && semanas.length > 0 && new Date(semanas[semanas.length-1].inicio) > endPeriod) {
-        semanas.pop(); // Remove last week if its start is already past period end
-        break;
-    }
-  }
-  return semanas;
-};
-
-const mockProfessors: Professor[] = [
-  { id: 'EMP001', nombre: 'ANQUISE JIHUAÑA, YUSELENIN', idNumber: '001634701', contractHours: 19 },
-  { id: 'EMP002', nombre: 'GARCIA PEREZ, ANA LUCIA', idNumber: '001634702', contractHours: 24 },
-  { id: 'EMP003', nombre: 'LOPEZ PAREDES, CARLOS MARTIN', idNumber: '001634703', contractHours: 20 },
 ];
 
 let mockProfessorDataStore: Record<string, DailyHours> = {};
@@ -135,42 +70,114 @@ const AdministrarAsistencia: React.FC = () => {
   const [selectedWeekForBulkEditValue, setSelectedWeekForBulkEditValue] = useState<string>(''); // stores "inicio_fin"
   const [allProfessorsAttendanceData, setAllProfessorsAttendanceData] = useState<AllProfessorsWeeklyEntry[]>([]);
 
-  const [semanasDelPeriodo, setSemanasDelPeriodo] = useState<Semana[]>([]);
+  const [semanas, setSemanas] = useState<Semana[]>([]);
+  const [semanaSeleccionada, setSemanaSeleccionada] = useState<string>("");
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: 'info' | 'error' | 'success'; text: string } | null>(null);
-
-  // Initialize periods and default professor
+  //Lista de profesores
   useEffect(() => {
-    const initialPeriods = generateMockPeriods();
-    setPeriods(initialPeriods);
-    if (initialPeriods.length > 0) {
-      const defaultPeriod = initialPeriods.find(p => p.label === "FEBRERO - MARZO 2024");
-      setSelectedPeriod(defaultPeriod ? defaultPeriod.value : initialPeriods[0].value);
+  async function fetchProfessors() {
+    try {
+      const res = await fetch('http://localhost:5009/profesores');
+      const data = await res.json();
+
+      const activos: Professor[] = data
+        .filter((p: any) => p.estado === 'Activo')
+        .map((p: any) => ({
+          idNumber: p.id_institucional,
+          nombre: p.nombre,
+          id: String(p.id),
+          contractHours: parseInt(p.horas_segun_contrato, 10),
+        }));
+
+      // sobreescribimos directamente el contenido del mock porque lamentablemente eso se usa para todo no se porque no lo guardaron en el state
+      mockProfessors.length = 0;
+      mockProfessors.push(...activos);
+      
+      // Initialize periods and default professor(pa que el profe siempre sea el [0])
+      if (mockProfessors.length > 0) {
+        setSelectedProfessorId(mockProfessors[0].id);
+      }
+    } catch (error) {
+      console.error("Error al cargar los profesores:", error);
     }
-    if (mockProfessors.length > 0) {
-      setSelectedProfessorId(mockProfessors[0].id);
+  }
+
+  fetchProfessors();
+}, []);
+
+
+  //Insercion de periodos a Periodo
+  useEffect(() => {
+    async function fetchPeriodos() {
+      try {
+        const res = await fetch('http://localhost:3000/reporte-asistencia/periodos');
+        const data = await res.json();
+
+        const opciones: Periodo[] = data.map((item: any) => ({
+          value: JSON.stringify({ inicio: item.inicio, fin: item.fin }),
+          label: item.etiqueta
+        }));
+
+        setPeriods(opciones);
+
+        if (opciones.length > 0) {
+          setSelectedPeriod(opciones[0].value);
+        }
+      } catch (error) {
+        console.error("Error al cargar los periodos:", error);
+      }
     }
+
+    fetchPeriodos();
   }, []);
 
-  // Update semanasDelPeriodo when selectedPeriod changes
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPeriod(e.target.value);
+    const periodo = JSON.parse(e.target.value);
+    console.log("Seleccionado:", periodo); // {inicio: "...", fin: "..."}
+  };
+
+
+
+
+  // Recarga las opciones en semana cuando el periodo es seleccionado o cambiado
   useEffect(() => {
-    if (selectedPeriod) {
-      const weeks = generateMockSemanasForPeriod(selectedPeriod);
-      setSemanasDelPeriodo(weeks);
-      // Reset selected week for bulk edit if period changes
-      setSelectedWeekForBulkEditValue(''); 
-      setAllProfessorsAttendanceData([]);
-      if (viewMode === 'allProfessorsWeek' && weeks.length > 0) {
-        // Optionally auto-select first week
-        // setSelectedWeekForBulkEditValue(`${weeks[0].inicio}_${weeks[0].fin}`);
+    async function fetchSemanas(periodoStr: string) {
+      if (!selectedPeriod) return;
+      try {
+        const res = await fetch(`http://localhost:3000/reporte-asistencia/semanas?periodo=${periodoStr}`);
+        const data = await res.json();
+
+        const opciones: Semana[] = data.map((item: any) => ({
+          inicio: item.inicio,
+          fin: item.fin,
+          label: item.nombre+" : "+item.inicio+" - "+item.fin
+        }));
+
+        setSemanas(opciones);
+        setSemanaSeleccionada("");
+      } catch (error) {
+        console.error("Error al cargar semanas:", error);
       }
-    } else {
-      setSemanasDelPeriodo([]);
-      setSelectedWeekForBulkEditValue('');
-      setAllProfessorsAttendanceData([]);
     }
-  }, [selectedPeriod, viewMode]); // Added viewMode to re-evaluate if needed
+
+    if (selectedPeriod) {
+      const { inicio, fin } = JSON.parse(selectedPeriod);
+      const periodoStr = `${inicio}_${fin}`;
+      fetchSemanas(periodoStr);
+    } else {
+      setSemanas([]);
+      setSemanaSeleccionada("");
+    }
+  }, [selectedPeriod]);
+
+  const handleSemanaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSemanaSeleccionada(e.target.value);
+    const semana = semanas.find(s => s.label === e.target.value);
+    console.log("Semana seleccionada:", semana);
+  };
 
   // Load professor details for single professor view
   useEffect(() => {
@@ -189,31 +196,114 @@ const AdministrarAsistencia: React.FC = () => {
   };
 
   // --- Single Professor - Period View Logic ---
-  const loadSingleProfessorData = useCallback(() => {
+
+
+  // const loadSingleProfessorData = useCallback(() => {
+  //   if (!selectedPeriod || !selectedProfessorId || viewMode !== 'singleProfessorPeriod') {
+  //     setAttendanceGridData([]);
+  //     return;
+  //   }
+  //   setIsLoading(true);
+  //   setMessage(null);
+  //   // Ensure semanasDelPeriodo is up-to-date before using it
+  //   const currentSemanas = semanas; // reemplazamos la funcion donde generaba semanas por el mismo objeto donde ya se llamaron las semanas y se insertadon
+
+  //   const gridData: ProfessorWeeklyAttendance[] = currentSemanas.map((week) => {
+  //     const storeKey = generateDataStoreKey(selectedProfessorId, selectedPeriod, week);
+  //     const existingHours = mockProfessorDataStore[storeKey];
+  //     return {
+  //       weekId: `${week.inicio}_${week.fin}`,
+  //       weekLabel: week.label,
+  //       semanaInfo: week,
+  //       days: existingHours || { lunes: 0, martes: 0, miercoles: 0, jueves: 0, viernes: 0, sabado: 0, domingo: 0 },
+  //     };
+  //   });
+  //   setAttendanceGridData(gridData);
+  //   if (currentSemanas.length === 0) setMessage({ type: 'info', text: 'No hay semanas para este periodo.' });
+  //   setIsLoading(false);
+  // }, [selectedPeriod, selectedProfessorId, viewMode, semanas]);
+
+
+  const loadSingleProfessorData = useCallback(async () => {
     if (!selectedPeriod || !selectedProfessorId || viewMode !== 'singleProfessorPeriod') {
       setAttendanceGridData([]);
       return;
     }
+
     setIsLoading(true);
     setMessage(null);
-    // Ensure semanasDelPeriodo is up-to-date before using it
-    const currentSemanas = generateMockSemanasForPeriod(selectedPeriod);
 
-    const gridData: ProfessorWeeklyAttendance[] = currentSemanas.map((week) => {
-      const storeKey = generateDataStoreKey(selectedProfessorId, selectedPeriod, week);
-      const existingHours = mockProfessorDataStore[storeKey];
-      return {
-        weekId: `${week.inicio}_${week.fin}`,
-        weekLabel: week.label,
-        semanaInfo: week,
-        days: existingHours || { lunes: 0, martes: 0, miercoles: 0, jueves: 0, viernes: 0, sabado: 0, domingo: 0 },
-      };
-    });
-    setAttendanceGridData(gridData);
-    if (currentSemanas.length === 0) setMessage({type: 'info', text: 'No hay semanas para este periodo.'});
-    setIsLoading(false);
+    const { inicio, fin } = JSON.parse(selectedPeriod);
+
+    try {
+      const res = await fetch(`http://localhost:3000/reporte-asistencia?inicio=${inicio}&fin=${fin}&modo=periodo&profesor_id=${selectedProfessorId}`);
+      const json = await res.json();
+      const profesor = json.datos[0];
+
+      if (!profesor || !profesor.semanas) {
+        setMessage({ type: 'info', text: 'No hay datos de asistencia para este profesor.' });
+        setAttendanceGridData([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const gridData: ProfessorWeeklyAttendance[] = profesor.semanas.map((semana: any) => {
+        const days: DailyHours = {
+          lunes: 0,
+          martes: 0,
+          miercoles: 0,
+          jueves: 0,
+          viernes: 0,
+          sabado: 0,
+          domingo: 0
+        };
+
+        semana.dias.forEach((dia: any) => {
+          const fecha = dayjs(dia.fecha);
+          const diaSemana = fecha.format('dddd'); // Ej: 'wednesday' o dias de la semana 
+          const map: Record<string, keyof DailyHours> = {
+            monday: 'lunes',
+            tuesday: 'martes',
+            wednesday: 'miercoles',
+            thursday: 'jueves',
+            friday: 'viernes',
+            saturday: 'sabado',
+            sunday: 'domingo'
+          };
+
+          const key = map[diaSemana.toLowerCase()];
+          if (key) {
+            const [hrs, mins] = dia.horas.split(':').map(Number);
+            days[key] = hrs + (mins >= 30 ? 0.5 : 0); // puedes mejorar esto según precisión deseada ya sea porque son 2.5 horas o cosas asi
+          }
+        });
+
+        return {
+          weekId: `${semana.inicio}_${semana.fin}`,
+          weekLabel: semana.semana,
+          semanaInfo: {
+            inicio: semana.inicio,
+            fin: semana.fin,
+            label: semana.semana
+          },
+          days
+        };
+      });
+
+      setAttendanceGridData(gridData);
+      setProfessorDisplayName(profesor.nombre);
+      setProfessorContractHours(Number(profesor.horas_contrato));
+      setProfessorContractId(selectedProfessorId);
+
+    } catch (error) {
+      console.error("Error al cargar datos del profesor:", error);
+      setMessage({ type: 'error', text: 'Error al cargar datos del servidor.' });
+    } finally {
+      setIsLoading(false);
+    }
   }, [selectedPeriod, selectedProfessorId, viewMode]);
 
+  //aca se carga los datos en el modo de un solo profesor
   useEffect(() => {
     if (viewMode === 'singleProfessorPeriod') {
       loadSingleProfessorData();
@@ -312,10 +402,15 @@ const AdministrarAsistencia: React.FC = () => {
       <div className="header-controls">
         <div className="form-group">
           <label htmlFor="periodo">Periodo:</label>
-          <select id="periodo" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} disabled={isLoading} className="form-input">
+          {/* <select id="periodo" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} disabled={isLoading} className="form-input">
             <option value="">-- Selecciona Periodo --</option>
             {periods.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
+          </select> */}
+
+          <select id="periodo" value={selectedPeriod} onChange={handleChange} disabled={isLoading} className="form-input">
+            <option value="">-- Seleccione Periodo--</option>
+              {periods.map((periodo, idx) => (<option key={idx} value={periodo.value}>{periodo.label}</option>))}
+            </select>
         </div>
 
         {viewMode === 'singleProfessorPeriod' && (
@@ -335,11 +430,11 @@ const AdministrarAsistencia: React.FC = () => {
               id="semanaBulkEdit" 
               value={selectedWeekForBulkEditValue} 
               onChange={(e) => setSelectedWeekForBulkEditValue(e.target.value)} 
-              disabled={isLoading || semanasDelPeriodo.length === 0} 
+              disabled={isLoading || semanas.length === 0} 
               className="form-input"
             >
               <option value="">-- Selecciona Semana --</option>
-              {semanasDelPeriodo.map(s => <option key={`${s.inicio}_${s.fin}`} value={`${s.inicio}_${s.fin}`}>{s.label}</option>)}
+              {semanas.map(s => <option key={`${s.inicio}_${s.fin}`} value={`${s.inicio}_${s.fin}`}>{s.label}</option>)}
             </select>
           </div>
         )}
@@ -392,7 +487,7 @@ const AdministrarAsistencia: React.FC = () => {
           {allProfessorsAttendanceData.length > 0 ? (
             <div className="attendance-grid-crud">
                <h4>
-                Editando horas para todos los profesores - Semana: {semanasDelPeriodo.find(s => `${s.inicio}_${s.fin}` === selectedWeekForBulkEditValue)?.label || selectedWeekForBulkEditValue}
+                Editando horas para todos los profesores {semanas.find(s => `${s.inicio}_${s.fin}` === selectedWeekForBulkEditValue)?.label || selectedWeekForBulkEditValue}
               </h4>
               <table>
                 <thead><tr><th>Profesor</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th><th>Domingo</th><th>Total Semanal</th></tr></thead>
@@ -426,7 +521,7 @@ const AdministrarAsistencia: React.FC = () => {
           )}
         </>
       )}
-       {viewMode === 'allProfessorsWeek' && !isLoading && !selectedWeekForBulkEditValue && semanasDelPeriodo.length > 0 && (
+       {viewMode === 'allProfessorsWeek' && !isLoading && !selectedWeekForBulkEditValue && semanas.length > 0 && (
             <p className="info-text">Por favor, selecciona una semana del periodo actual para ver y editar las horas de todos los profesores.</p>
         )}
     </div>
