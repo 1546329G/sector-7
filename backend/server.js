@@ -26,10 +26,15 @@ import express from 'express';
 import reporteRoutes from './routes/reporte.js';
 import periodoRoutes from './routes/periodos.js';
 import saveRoutes from './routes/save.js';
+import cors from 'cors'
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 
 app.get('/', (req, res) => {
   res.send('Hola!');

@@ -100,7 +100,6 @@ router.get('/reporte-asistencia/semanas', (req, res) => {
     if (finSemana.isAfter(inicio.subtract(1, 'day')) && inicioSemana.isBefore(fin.add(1, 'day'))) {
       semanas.push({
         nombre: `Semana ${contador}`,
-        numero: contador,
         inicio: inicioSemana.format('YYYY-MM-DD'),
         fin: finSemana.format('YYYY-MM-DD')
       });

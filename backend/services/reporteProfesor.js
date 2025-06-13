@@ -184,7 +184,7 @@ async function getAsistenciaActual(inicio, fin, profesorId) {
 
       dias.forEach(d => {
         const dia = d.format('dddd').toLowerCase();
-        const horario = prof.Horarios.find(h => h.dia_semana === dia);
+        const horario = prof.Horarios.find(h => h.dia_semana.toLowerCase() === dia); //dependiendo de como se guarden los dias en horarios se va a tener que modificar esto
 
         if (horario) {
           const entrada = dayjs(`${d.format('YYYY-MM-DD')}T${horario.hora_entrada}`);
