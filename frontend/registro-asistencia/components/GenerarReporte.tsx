@@ -863,6 +863,7 @@ const GenerarReporte: React.FC = () => {
             </button>
           </div>
         </div>
+        
       </div>
       
       {/* Contenedor oculto para renderizar los gráficos temporalmente */}
@@ -878,6 +879,7 @@ const GenerarReporte: React.FC = () => {
       }}>
         <canvas ref={chartCanvasRef}></canvas>
       </div>
+         <a>lo hizo gandy</a>
     </div>
   );
 };
