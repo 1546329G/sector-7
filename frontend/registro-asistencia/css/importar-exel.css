@@ -1,0 +1,265 @@
+/* src/importar-exel.css */
+
+/* Base Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f7f6; /* Light background for the whole page */
+}
+
+/* App Container */
+.app-container {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header for tab-like buttons */
+.app-header {
+  text-align: center;
+  padding: 0 20px; /* Only horizontal padding for alignment */
+  background-color: #ffffff; /* White background */
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center; /* Center the buttons */
+  align-items: flex-end; /* Align buttons to the bottom of the header for tab effect */
+  min-height: 60px; /* Ensure header has some height */
+  padding-top: 15px; /* Padding above buttons */
+}
+
+.app-header button {
+  background-color: #f0f0f0; /* Light gray for inactive tabs */
+  color: #555;
+  padding: 10px 25px; /* Comfortable padding */
+  border: 1px solid #ddd; /* Light border */
+  border-bottom: none; /* No bottom border for tab effect */
+  border-radius: 8px 8px 0 0; /* Rounded top corners */
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease; /* Smooth transition */
+  box-shadow: none; /* No shadow by default */
+  margin: 0 2px; /* Small gap between tabs */
+  position: relative; /* For z-index to make active tab appear on top */
+  top: 1px; /* To overlap the border-bottom of the header slightly */
+}
+
+.app-header button:hover:not(.active-button) {
+  background-color: #e6e6e6; /* Slightly darker on hover for inactive */
+  color: #333;
+}
+
+/* Style for the currently active tab button */
+.app-header button.active-button {
+  background-color: #ffffff; /* White background for the active tab content */
+  color: #007bff; /* Blue text for active tab */
+  border-color: #e0e0e0; /* Match header border for continuity */
+  border-bottom: 1px solid #ffffff; /* Hide bottom border to merge with content */
+  z-index: 10; /* Bring active tab to front */
+  transform: translateY(0); /* Ensure no lift for active tab */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow above active tab */
+}
+
+
+/* Main Content Area */
+.app-main {
+  flex-grow: 1; /* Allows main content to fill available space */
+  padding-bottom: 80px; /* Space for the footer */
+  display: flex; /* Use flexbox to center content */
+  justify-content: center; /* Center content horizontally */
+  align-items: flex-start; /* Align content to the top */
+  padding-top: 20px; /* Some padding from the header */
+}
+
+/* Wrapper for the Excel import content to ensure centering and consistent styling */
+.excel-import-wrapper {
+  max-width: 800px; /* Same max-width as import-excel-container */
+  width: 90%; /* Responsive width */
+  margin: 0 auto; /* Center it horizontally within app-main */
+  background-color: #ffffff; /* White background for content area */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Shadow for content area */
+  padding: 30px; /* Padding inside the wrapper */
+  box-sizing: border-box; /* Include padding in width */
+  /* Remove margin-top from .import-excel-container as this wrapper handles it */
+}
+
+
+/* Excel Import Container (common styles for both importers) */
+.import-excel-container {
+  text-align: center;
+  /* Removed all background, border, shadow, margin, padding as .excel-import-wrapper handles them */
+  /* This component now only defines the content *within* the wrapper */
+  width: 100%; /* Ensure it fills its parent wrapper */
+}
+
+.import-excel-container h1 {
+  color: #333;
+  margin-bottom: 25px;
+  font-size: 2em;
+}
+
+/* File Upload Box */
+.file-upload-box {
+  margin-bottom: 30px;
+  border: 2px dashed #a0a0a0; /* Dashed border for file upload */
+  padding: 30px;
+  border-radius: 10px;
+  background-color: #fdfdfd;
+}
+
+.file-upload-label {
+  background-color: #007bff; /* Blue button for file selection */
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.file-upload-label:hover {
+  background-color: #0056b3;
+}
+
+.file-name-display {
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 10px;
+}
+
+/* Error Message */
+.error-message {
+  color: #dc3545; /* Red for errors */
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+/* Table Container */
+.table-container {
+  margin-top: 40px;
+  overflow-x: auto; /* Allows horizontal scrolling for large tables */
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.table-container h2 {
+  text-align: left;
+  margin-left: 15px;
+  color: #444;
+  font-size: 1.5em;
+  margin-bottom: 15px;
+}
+
+/* Data Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0; /* Already inside container */
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #e9ecef; /* Lighter border for cells */
+  padding: 12px;
+  text-align: left;
+}
+
+.data-table thead tr {
+  background-color: #e9ecef; /* Light gray for header */
+  color: #333;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa; /* Zebra striping */
+}
+
+.data-table tbody tr:hover {
+  background-color: #e2f0ff; /* Highlight row on hover */
+}
+
+/* Initial Welcome Message (shown when no importer is selected) */
+.welcome-message {
+  text-align: center;
+  margin-top: 50px; /* Adjusted margin */
+  color: #666;
+  padding: 20px; /* Add padding to welcome message */
+}
+
+.welcome-message h2 {
+  font-size: 2em;
+  margin-bottom: 15px;
+}
+
+.welcome-message p {
+  font-size: 1.1em;
+}
+
+/* Specific Excel Importer Placeholder */
+.specific-importer-placeholder {
+  /* Removed all background, border, shadow, margin, padding as .excel-import-wrapper handles them */
+  /* This component now only defines the content *within* the wrapper */
+  width: 100%; /* Ensure it fills its parent wrapper */
+  padding: 30px; /* Keep internal padding for placeholder text */
+  box-sizing: border-box;
+}
+
+.specific-importer-placeholder h1 {
+  color: #343a40;
+}
+
+.specific-importer-placeholder ul {
+  list-style-type: none; /* Remove default bullets */
+  padding: 0;
+  margin-top: 20px;
+}
+
+.specific-importer-placeholder li {
+  background-color: #e9ecef;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Footer */
+.app-footer {
+  background-color: #343a40; /* Darker background for footer */
+  padding: 15px 25px;
+  border-top: 1px solid #495057;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #adb5bd; /* Lighter text color */
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.footer-links-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-link {
+  text-decoration: none;
+  color: #adb5bd;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #ffffff; /* White on hover */
+}

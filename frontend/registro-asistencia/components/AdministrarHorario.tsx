@@ -207,6 +207,7 @@ const GestionHorarios: React.FC = () => {
   return (
     <div className="gestion-horario-page-container">
       <h1 className="main-page-title">Gestión de Horarios</h1>
+      
 
       {mainMessage && (
         <p className={`page-feedback-message ${mainMessage.type}`}>
@@ -329,6 +330,7 @@ const GestionHorarios: React.FC = () => {
           </div>
         )}
       </div>
+        <h5>lo hizo gandy,</h5>
     </div>
   );
 };

@@ -1,57 +1,139 @@
+// NuevoUsuario.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-// Asegúrate de que esta ruta sea correcta para tu archivo CSS.
-// Si el error de compilación persiste, revisa la ubicación de 'NuevoUsuario.css'
-// respecto a 'GestionUsuarios.tsx'. Por ejemplo, si GestionUsuarios.tsx está en 'src/components/'
-// y NuevoUsuario.css en 'src/css/', la ruta correcta sería '../../css/NuevoUsuario.css'.
 import '../css/NuevoUsuario.css'; 
 
 // --- Interfaces para los datos de usuario ---
-// Es CRUCIAL que estas propiedades (id, username, rol, activo, creado_en, actualizado_en)
-// COINCIDAN exactamente con los nombres de campo que tu API 3 devuelve para cada usuario.
-// Particularmente 'activo' debe existir en tu base de datos y ser devuelto por la API.
 interface User {
-    id: string; // O 'number' si tu ID en la base de datos es un número
+    id: string;
     username: string;
-    rol: 'usuario' | 'reportes' | 'docente' | 'admin' | 'user'; // Incluye todos los roles posibles
-    activo: boolean; // Estado activo/inactivo (boolean). ¡Esta columna debe existir en tu DB y API!
-    creado_en: string; // Fecha de creación (formato ISO string)
-    actualizado_en: string; // Fecha de última actualización (formato ISO string)
+    rol: 'usuario' | 'reportes' | 'docente' | 'admin' | 'user';
+    activo: boolean;
+    creado_en: string;
+    actualizado_en: string;
+
 }
 
-const GestionUsuarios: React.FC = () => {
+const NuevoUsuario: React.FC = () => {
     // --- Estados para el formulario de nuevo usuario ---
     const [newUsername, setNewUsername] = useState<string>('');
     const [newPassword, setNewPassword] = useState<string>('');
     const [newRole, setNewRole] = useState<User['rol']>('usuario'); // Rol por defecto
 
     // --- Estados para la tabla de usuarios ---
-    const [users, setUsers] = useState<User[]>([]);
-    const [editingUser, setEditingUser] = useState<User | null>(null); // Usuario que se está editando
+    const [users, setUsers] = useState<User[]>([]); // Estado para la lista de usuarios
+    const [editingUser, setEditingUser] = useState<User | null>(null);
     const [editUsername, setEditUsername] = useState<string>('');
     const [editRole, setEditRole] = useState<User['rol']>('usuario');
     const [editActivo, setEditActivo] = useState<boolean>(false);
 
     // --- Estados de UI/mensajes ---
-    const [isLoading, setIsLoading] = useState<boolean>(true); // Carga inicial de usuarios
-    const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false); // Envío del formulario de creación
-    const [isEditingSubmitting, setIsEditingSubmitting] = useState<boolean>(false); // Envío del formulario de edición
+    const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(true); 
+    const [isLoadingCount, setIsLoadingCount] = useState<boolean>(true); 
+    const [isFormSubmitting, setIsFormSubmitting] = useState<boolean>(false); 
+    const [isEditingSubmitting, setIsEditingSubmitting] = useState<boolean>(false); 
     const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
+
+    // --- Estado para el conteo de usuarios ---
+    const [userCount, setUserCount] = useState<number | null>(null);
 
     // --- URLs de tu API Backend (confirmado que usa el puerto 5010) ---
     const API_AUTH_URL = 'http://localhost:5010/api/auth';
-    const API_USERS_URL = 'http://localhost:5010/api/users';
+    const API_USERS_URL = 'http://localhost:5010/api/users'; // URL para obtener usuarios y el conteo
 
     // --- Función para obtener el token JWT del localStorage ---
     const getToken = useCallback(() => {
-        // DEBUG: Esta línea es crucial. Debe coincidir con cómo se guarda el token en Login.tsx.
-        // Si en Login.tsx usas 'jwt_token', aquí debe ser 'jwt_token'.
-        // Si en Login.tsx usas 'authToken', aquí debe ser 'authToken'.
-        // Según lo que dijiste, tu Login.tsx usa 'jwt_token'.
-        console.log('DEBUG: Intentando obtener token de localStorage con clave "jwt_token"'); // DEBUG
-        return localStorage.getItem('jwt_token'); // <--- ¡CORREGIDO A 'jwt_token' para que coincida con tu Login.tsx!
+        return localStorage.getItem('jwt_token');
     }, []);
 
-    
+    // --- Nueva función para obtener el conteo de usuarios ---
+    const fetchUserCount = useCallback(async () => {
+        setIsLoadingCount(true);
+        setMessage(null);
+        const token = getToken();
+
+        if (!token) {
+            setMessage({ type: 'error', text: 'No autenticado para obtener el conteo de usuarios.' });
+            setIsLoadingCount(false);
+            setUserCount(null);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_USERS_URL}/count`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Manejar 401/403 aquí si el token es inválido o el rol no tiene permiso
+                if (response.status === 401 || response.status === 403) {
+                    setMessage({ type: 'error', text: 'No autorizado para ver el conteo de usuarios. Asegúrate de tener el rol correcto (admin/reportes).' });
+                } else {
+                    throw new Error(data.message || 'Error al obtener el conteo de usuarios.');
+                }
+            } else {
+                setUserCount(data.totalUsers);
+            }
+        } catch (error: any) {
+            console.error('Error al obtener el conteo de usuarios:', error);
+            setMessage({ type: 'error', text: error.message || 'Error al cargar el conteo de usuarios.' });
+            setUserCount(null);
+        } finally {
+            setIsLoadingCount(false);
+        }
+    }, [getToken, API_USERS_URL]);
+
+    // --- Nueva función para obtener TODOS los usuarios (para la tabla) ---
+    const fetchUsers = useCallback(async () => {
+        setIsLoadingUsers(true);
+        setMessage(null);
+        const token = getToken();
+
+        if (!token) {
+            setMessage({ type: 'error', text: 'No autenticado para obtener la lista de usuarios.' });
+            setIsLoadingUsers(false);
+            setUsers([]); // Limpia la tabla si no hay token
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_USERS_URL}/`, { // Llama al endpoint de todos los usuarios
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    setMessage({ type: 'error', text: 'No autorizado para ver la lista de usuarios. Asegúrate de tener el rol correcto (admin/reportes).' });
+                } else {
+                    throw new Error(data.message || 'Error al obtener los usuarios.');
+                }
+            } else {
+                // Asegurarse de que los datos tengan las propiedades correctas
+                const formattedUsers: User[] = data.map((user: any) => ({
+                    id: user.id.toString(), 
+                    username: user.username,
+                    rol: user.rol as User['rol'],
+                    activo: Boolean(user.activo), // Convertir tinyint(1) a boolean
+                    creado_en: user.creado_en,
+                    actualizado_en: user.actualizado_en,
+                }));
+                setUsers(formattedUsers);
+            }
+        } catch (error: any) {
+            console.error('Error al obtener los usuarios:', error);
+            setMessage({ type: 'error', text: error.message || 'Error al cargar la lista de usuarios.' });
+            setUsers([]);
+        } finally {
+            setIsLoadingUsers(false);
+        }
+    }, [getToken, API_USERS_URL]);
 
     // --- Manejador para crear un nuevo usuario ---
     const handleCreateUser = async (e: React.FormEvent) => {
@@ -66,7 +148,6 @@ const GestionUsuarios: React.FC = () => {
         }
 
         try {
-            // Este endpoint de registro NO DEBE requerir autenticación en tu API.
             const response = await fetch(`${API_AUTH_URL}/register`, {
                 method: 'POST',
                 headers: {
@@ -87,7 +168,9 @@ const GestionUsuarios: React.FC = () => {
 
             setMessage({ type: 'success', text: data.message || `Usuario '${newUsername}' creado exitosamente.` });
 
-        
+            // Recargar el conteo y la lista de usuarios después de crear uno nuevo
+            fetchUserCount();
+            fetchUsers();
 
             // Limpiar el formulario
             setNewUsername('');
@@ -126,7 +209,6 @@ const GestionUsuarios: React.FC = () => {
         }
 
         try {
-            // Este endpoint PUT /api/users/:id requiere autenticación y autorización
             const response = await fetch(`${API_USERS_URL}/${editingUser.id}`, {
                 method: 'PUT',
                 headers: {
@@ -137,7 +219,6 @@ const GestionUsuarios: React.FC = () => {
                     username: editUsername,
                     rol: editRole,
                     activo: editActivo,
-                    // La contraseña no se envía aquí
                 }),
             });
 
@@ -147,18 +228,10 @@ const GestionUsuarios: React.FC = () => {
                 throw new Error(data.message || 'Error al actualizar usuario.');
             }
 
-            // Actualiza el estado local de los usuarios
-            setUsers(prevUsers =>
-                prevUsers.map(user => (user.id === editingUser.id ? {
-                    ...user,
-                    username: editUsername,
-                    rol: editRole,
-                    activo: editActivo,
-                    actualizado_en: data.user?.actualizado_en || new Date().toISOString() // Usa el timestamp de la API si lo devuelve
-                } : user))
-            );
             setMessage({ type: 'success', text: data.message || `Usuario '${editUsername}' actualizado.` });
-            setEditingUser(null); // Salir del modo edición
+            setEditingUser(null);
+            fetchUsers(); // Recargar la lista después de la edición
+            fetchUserCount(); // Recargar el conteo si un usuario se activa/desactiva
         } catch (error: any) {
             console.error('Error al guardar edición:', error);
             setMessage({ type: 'error', text: error.message || 'Error al actualizar usuario. Asegúrate de que tu API tiene el endpoint PUT /api/users/:id.' });
@@ -180,17 +253,14 @@ const GestionUsuarios: React.FC = () => {
         }
 
         setMessage(null);
-        setIsLoading(true); // Poner loading general durante la eliminación
         const token = getToken();
 
         if (!token) {
             setMessage({ type: 'error', text: 'No autenticado para eliminar usuario.' });
-            setIsLoading(false);
             return;
         }
 
         try {
-            // Este endpoint DELETE /api/users/:id requiere autenticación y autorización
             const response = await fetch(`${API_USERS_URL}/${userId}`, {
                 method: 'DELETE',
                 headers: {
@@ -205,13 +275,12 @@ const GestionUsuarios: React.FC = () => {
                 throw new Error(data.message || 'Error al eliminar usuario.');
             }
 
-            setUsers(prevUsers => prevUsers.filter(user => user.id !== userId)); // Eliminar del estado local
             setMessage({ type: 'success', text: data.message || `Usuario '${username}' eliminado.` });
+            fetchUsers(); // Recargar la lista después de eliminar
+            fetchUserCount(); // Recargar el conteo después de eliminar
         } catch (error: any) {
             console.error('Error al eliminar usuario:', error);
             setMessage({ type: 'error', text: error.message || 'Error al eliminar usuario. Asegúrate de que tu API tiene el endpoint DELETE /api/users/:id.' });
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -226,7 +295,6 @@ const GestionUsuarios: React.FC = () => {
         }
 
         try {
-            // Este endpoint PATCH /api/users/:id/toggle-status requiere autenticación y autorización
             const response = await fetch(`${API_USERS_URL}/${userId}/toggle-status`, {
                 method: 'PATCH',
                 headers: {
@@ -242,20 +310,20 @@ const GestionUsuarios: React.FC = () => {
                 throw new Error(data.message || 'Error al cambiar estado de usuario.');
             }
 
-            // Actualiza el estado local para reflejar el cambio y el timestamp
-            setUsers(prevUsers =>
-                prevUsers.map(user =>
-                    user.id === userId
-                        ? { ...user, activo: !currentStatus, actualizado_en: data.user?.actualizado_en || new Date().toISOString() }
-                        : user
-                )
-            );
             setMessage({ type: 'success', text: data.message || `Estado de '${username}' actualizado a ${!currentStatus ? 'Activo' : 'Inactivo'}.` });
+            fetchUsers(); 
+            fetchUserCount(); 
         } catch (error: any) {
             console.error('Error al cambiar estado de usuario:', error);
             setMessage({ type: 'error', text: error.message || 'Error al cambiar estado de usuario. Asegúrate de que tu API tiene el endpoint PATCH /api/users/:id/toggle-status.' });
         }
     };
+
+    // --- useEffect para cargar el conteo y la lista de usuarios al montar el componente ---
+    useEffect(() => {
+        fetchUserCount();
+        fetchUsers();
+    }, [fetchUserCount, fetchUsers]); 
 
     return (
         <div className="gestion-usuarios-container">
@@ -313,16 +381,117 @@ const GestionUsuarios: React.FC = () => {
                 </form>
             </div>
 
-
-
-
-            {/* Sección para listar y administrar usuarios */}
-            <div className="card users-list-card">
-                <h3>Usuarios Registrados</h3>
-                
+            {/* Sección para mostrar el conteo de usuarios registrados */}
+            <div className="card users-count-card"> {/* Renombrado para claridad */}
+                <h3>Conteo de Usuarios</h3>
+                {isLoadingCount ? (
+                    <p>Cargando conteo de usuarios...</p>
+                ) : (
+                    userCount !== null ? (
+                        <p className="user-count">Total: **{userCount}** usuarios</p>
+                    ) : (
+                        <p className="user-count">No se pudo cargar el conteo de usuarios.</p>
+                    )
+                )}
             </div>
+
+            {/* Sección para mostrar la tabla de usuarios registrados */}
+            <div className="card users-list-card">
+                <h3>Lista de Usuarios Registrados</h3>
+                {isLoadingUsers ? (
+                    <p>Cargando lista de usuarios...</p>
+                ) : users.length > 0 ? (
+                    <div className="users-table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Rol</th>
+                                    <th>Activo</th>
+                                    <th>Creado En</th>
+                                    <th>Actualizado En</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.map((user) => (
+                                    <tr key={user.id}>
+                                        <td>{user.id}</td>
+                                        <td>
+                                            {editingUser?.id === user.id ? (
+                                                <input
+                                                    type="text"
+                                                    value={editUsername}
+                                                    onChange={(e) => setEditUsername(e.target.value)}
+                                                />
+                                            ) : (
+                                                user.username
+                                            )}
+                                        </td>
+                                        <td>
+                                            {editingUser?.id === user.id ? (
+                                                <select
+                                                    value={editRole}
+                                                    onChange={(e) => setEditRole(e.target.value as User['rol'])}
+                                                >
+                                                    <option value="usuario">Usuario</option>
+                                                    <option value="reportes">Reportes</option>
+                                                    <option value="docente">Docente</option>
+                                                    <option value="admin">Administrador</option>
+                                                </select>
+                                            ) : (
+                                                user.rol
+                                            )}
+                                        </td>
+                                        <td>
+                                            {editingUser?.id === user.id ? (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editActivo}
+                                                    onChange={(e) => setEditActivo(e.target.checked)}
+                                                />
+                                            ) : (
+                                                user.activo ? 'Sí' : 'No'
+                                            )}
+                                        </td>
+                                        <td>{new Date(user.creado_en).toLocaleString()}</td>
+                                        <td>{new Date(user.actualizado_en).toLocaleString()}</td>
+                                        <td className="actions-column">
+                                            {editingUser?.id === user.id ? (
+                                                <>
+                                                    <button className="save-button" onClick={handleSaveEdit} disabled={isEditingSubmitting}>
+                                                        {isEditingSubmitting ? 'Guardando...' : 'Guardar'}
+                                                    </button>
+                                                    <button className="cancel-button" onClick={handleCancelEdit} disabled={isEditingSubmitting}>
+                                                        Cancelar
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button className="edit-button" onClick={() => handleEdit(user)}>Editar</button>
+                                                    <button
+                                                        className={`toggle-status-button ${user.activo ? 'toggle-status-button-active' : 'toggle-status-button-inactive'}`}
+                                                        onClick={() => toggleUserStatus(user.id, user.activo, user.username)}
+                                                    >
+                                                        {user.activo ? 'Desactivar' : 'Activar'}
+                                                    </button>
+                                                    <button className="delete-button" onClick={() => handleDelete(user.id, user.username)}>Eliminar</button>
+                                                </>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <p>No hay usuarios registrados o no se pudieron cargar.</p>
+                )}
+            </div>
+            <h5>lo hizo gandy,</h5>
         </div>
     );
 };
 
-export default GestionUsuarios;
+export default NuevoUsuario;

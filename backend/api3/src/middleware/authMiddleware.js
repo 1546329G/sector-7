@@ -1,26 +1,26 @@
-// backend/api3/src/middleware/authMiddleware.js (CONVERTIDO A ES MODULES)
+// C:\xampp\htdocs\Proyecto\proyecto-entregable-sector-7\backend\api3\src\middleware\authMiddleware.js
+import { verifyToken } from '../utils/jwt.js'; // Ruta: desde middleware/ a utils/
 
-// CAMBIO: Usar import en lugar de require
-import { verifyToken } from '../utils/jwt.js'; // <-- Asegúrate de que esta ruta sea correcta y añade .js
-
+/**
+ * Middleware para verificar la validez del token JWT.
+ * Adjunta la información decodificada del token a `req.user`.
+ */
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  // Formato esperado: Bearer TOKEN
-  const token = authHeader && authHeader.split(' ')[1];
+    const authHeader = req.headers['authorization'];
+    // El token debe venir en el formato "Bearer TOKEN"
+    const token = authHeader && authHeader.split(' ')[1];
 
-  if (token == null) {
-    return res.status(401).json({ message: 'Token no proporcionado. Acceso denegado.' });
-  }
+    if (token == null) {
+        return res.status(401).json({ message: 'Token no proporcionado. Acceso denegado.' });
+    }
 
-  // Asegúrate de que verifyToken maneje errores o devuelva null/false si es inválido
-  const decoded = verifyToken(token);
-  if (!decoded) {
-    return res.status(403).json({ message: 'Token inválido o expirado. Acceso denegado.' });
-  }
+    const decoded = verifyToken(token);
+    if (!decoded) {
+        return res.status(403).json({ message: 'Token inválido o expirado. Acceso denegado.' });
+    }
 
-  req.user = decoded; // Adjunta el payload del token (ej. { username: 'testuser' }) a la solicitud
-  next();
+    req.user = decoded; // Adjunta el payload del token (ej. { id, username, rol }) a la solicitud
+    next();
 };
 
-// CAMBIO: Usar export default en lugar de module.exports
 export default authenticateToken;

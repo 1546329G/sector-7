@@ -879,7 +879,7 @@ const GenerarReporte: React.FC = () => {
       }}>
         <canvas ref={chartCanvasRef}></canvas>
       </div>
-         <a>lo hizo gandy</a>
+          <h5>lo hizo gandy,  normal descarga </h5>
     </div>
   );
 };

@@ -1,24 +1,35 @@
-// api3/src/utils/jwt.js
+// C:\xampp\htdocs\Proyecto\proyecto-entregable-sector-7\backend\api3\src\utils\jwt.js
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'; // Importa dotenv para asegurar el acceso a variables de entorno
 
-dotenv.config({ path: '../../.env' }); // Adjust path if .env is not in api3 root, but in your project root
+// Carga las variables de entorno.
+// Asumimos que el server.js principal ya carga el .env de la raíz de 'backend'.
+// Sin embargo, si api3 se inicia de forma independiente, esta línea es crucial.
+// La ruta es relativa al directorio actual (api3/src/utils/)
+dotenv.config({ path: process.cwd() + '/backend/.env' }); // Apunta al .env en la raíz de 'backend'
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-    console.error('FATAL ERROR: JWT_SECRET no está definido en las variables de entorno.');
-    process.exit(1); // Exit if secret is not set, as security is compromised
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key'; // ¡Usa una clave secreta fuerte y real en tu .env!
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
+/**
+ * Genera un token JWT para el payload dado.
+ * @param {object} payload - Los datos a incluir en el token (ej. { id, username, rol }).
+ * @returns {string} El token JWT generado.
+ */
 export const generateToken = (payload) => {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }); // Token expires in 1 hour
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
+/**
+ * Verifica un token JWT.
+ * @param {string} token - El token JWT a verificar.
+ * @returns {object|null} El payload decodificado si es válido, o null si es inválido/expirado.
+ */
 export const verifyToken = (token) => {
     try {
         return jwt.verify(token, JWT_SECRET);
     } catch (error) {
-        // console.error('Error verifying token:', error.message);
-        return null; // Return null if token is invalid or expired
+        // console.error('Error al verificar token:', error.message); // Descomentar para depuración
+        return null; // El token es inválido o ha expirado
     }
 };
