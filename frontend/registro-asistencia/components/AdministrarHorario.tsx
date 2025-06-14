@@ -294,7 +294,7 @@ const GestionHorarios: React.FC = () => {
                         <table className="horarios-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>ID-horario</th>
                                     <th>Profesor</th>
                                     <th>Día</th>
                                     <th>Hora Inicio</th>
