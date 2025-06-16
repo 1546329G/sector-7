@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import '../css/AdministrarAsistencia.css'; // Ensure this CSS file is adapted or created
 import dayjs from 'dayjs';
 
-// --- Interfaces ---
 interface Periodo {
   value: string;
   label: string;

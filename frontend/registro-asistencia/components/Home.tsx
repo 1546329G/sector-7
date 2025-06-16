@@ -38,6 +38,12 @@ const Layout: React.FC<LayoutProps> = ({ onLogout }) => {
                 <Link to="/home/administrar-usuario">Administrar Docente</Link>
               </li>
               <li>
+                <Link to="/home/administrar-horario">Administrar Horario</Link>
+              </li>
+              <li>
+                <Link to="/home/importar-excel">Importar Excel</Link>
+              </li>
+              <li>
                 <Link to="/home/administrar-asistencia">Administrar Asistencia</Link>
               </li>
               <li>

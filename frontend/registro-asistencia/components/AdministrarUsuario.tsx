@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import '../css/AdministrarUsuario.css'; // Asegúrate de que la ruta sea correcta
+import '../css/AdministrarUsuario.css'; 
 
 // Define la URL base de tu API de Profesores en el puerto 5009
 // Confirmamos que esta es la URL donde tu API 1 (Principal) debería estar escuchando para /profesores
@@ -60,7 +60,6 @@ const GestionDocente: React.FC = () => {
     }
   }, []);
 
-  // useEffect para cargar los profesores al montar el componente
   useEffect(() => {
     fetchProfessors();
   }, [fetchProfessors]);

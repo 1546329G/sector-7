@@ -84,6 +84,10 @@ Si no, el diseño de la imagen no muestra un <h2> tan prominente, sino que se ce
     padding-bottom: 20px; /* Espacio entre la línea y los selectores */
 }
 
+.header-controls{
+    display: flex;
+}
+
 .form-group {
     display: flex;
     flex-direction: row; /* Etiquetas e inputs en la misma línea */
@@ -91,6 +95,7 @@ Si no, el diseño de la imagen no muestra un <h2> tan prominente, sino que se ce
     gap: 10px; /* Espacio entre label y select */
     min-width: unset; /* Quita el min-width */
     margin-right: 20px; /* Espacio entre grupos de formulario */
+    flex:1;
 }
 
 .form-group label {
