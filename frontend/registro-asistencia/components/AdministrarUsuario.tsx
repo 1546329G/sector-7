@@ -268,7 +268,7 @@ const GestionDocente: React.FC = () => {
                   <th>ID Institucional</th>
                   <th>Nombre</th>
                   <th>Horas Contrato</th>
-                  <th>Horario</th>
+          
                   <th>Estado</th>
                   <th>Fecha Registro</th>
                   <th>Última Modificación</th>
@@ -282,7 +282,7 @@ const GestionDocente: React.FC = () => {
                     <td>{profesor.id_institucional}</td>
                     <td>{profesor.nombre}</td>
                     <td>{profesor.horas_segun_contrato}</td>
-                    <td>{profesor.horario && profesor.horario.length > 0 ? profesor.horario.join('; ') : 'N/A'}</td>
+                  
                     <td>
                       <span className={`estado-badge ${profesor.estado.toLowerCase()}`}>
                         {profesor.estado}
