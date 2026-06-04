@@ -19,4 +19,4 @@ router.post('/reporte-asistencia/guardar', async (req, res) => {
   }
 });
 
-export default router
+export default router;

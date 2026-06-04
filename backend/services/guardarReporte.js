@@ -24,7 +24,6 @@ async function guardarAsistencia(datos) {
   });
 
   if (!creado) {
-    // si ya existe, actualizarlo
     registro.horas = horas;
     registro.tardanza = tardanza;
     registro.justificacion = justificacion;

@@ -3,7 +3,6 @@ import db from '../models/index.js';
 const router = express.Router();
 const { Asistencia } = db;
 
-
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat.js';
 import es from 'dayjs/locale/es.js';
@@ -14,9 +13,6 @@ dayjs.extend(localizedFormat);
 dayjs.locale(es);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
-
-
-
 
 router.get('/reporte-asistencia/periodos', async (req, res) => {
   try {
@@ -112,4 +108,4 @@ router.get('/reporte-asistencia/semanas', (req, res) => {
   res.json(semanas);
 });
 
-export default router
+export default router;

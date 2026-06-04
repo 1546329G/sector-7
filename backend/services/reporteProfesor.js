@@ -5,6 +5,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat.js';
 import es from 'dayjs/locale/es.js';
 import isoWeek from 'dayjs/plugin/isoWeek.js';
 import duration from 'dayjs/plugin/duration.js';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore.js';
 
 const { Asistencia, Profesor, Horario } = db;
 
@@ -12,10 +13,8 @@ dayjs.extend(localizedFormat);
 dayjs.locale(es);
 dayjs.extend(isoWeek);
 dayjs.extend(duration);
+dayjs.extend(isSameOrBefore);
 
-
-
-// funciones auxiliares para obtener JSON estructurado
 function agruparEnSemanas(dias) {
   const semanas = [];
   const agrupadas = {};
@@ -53,7 +52,6 @@ function formatoHoras(minutos) {
   return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
 }
 
-// Obtener reporte de lo ya guardado en BD
 async function getAsistenciaHistorica(inicio, fin, profesorId) {
   const where = {
     fecha: {
@@ -71,7 +69,6 @@ async function getAsistenciaHistorica(inicio, fin, profesorId) {
     order: [['fecha', 'ASC']]
   });
 
-  // Generar rango de días
   const dias = [];
   let cursor = dayjs(inicio);
   const limite = dayjs(fin);
@@ -85,7 +82,6 @@ async function getAsistenciaHistorica(inicio, fin, profesorId) {
     semana, inicio, fin
   }));
 
-  // Agrupar asistencias por profesor
   const porProfesor = {};
 
   asistencias.forEach(a => {
@@ -105,7 +101,6 @@ async function getAsistenciaHistorica(inicio, fin, profesorId) {
     });
   });
 
-  // Armar reporte estructurado por semanas
   const datos = Object.values(porProfesor).map(p => {
     let totalMes = 0;
 
@@ -150,7 +145,6 @@ async function getAsistenciaHistorica(inicio, fin, profesorId) {
   };
 }
 
-//Obtener el reporte calculando horarios
 async function getAsistenciaActual(inicio, fin, profesorId) {
   const where = {};
   if (profesorId) where.id = profesorId;
@@ -184,7 +178,7 @@ async function getAsistenciaActual(inicio, fin, profesorId) {
 
       dias.forEach(d => {
         const dia = d.format('dddd').toLowerCase();
-        const horario = prof.Horarios.find(h => h.dia_semana.toLowerCase() === dia); //dependiendo de como se guarden los dias en horarios se va a tener que modificar esto
+        const horario = prof.Horarios.find(h => h.dia_semana.toLowerCase() === dia);
 
         if (horario) {
           const entrada = dayjs(`${d.format('YYYY-MM-DD')}T${horario.hora_entrada}`);

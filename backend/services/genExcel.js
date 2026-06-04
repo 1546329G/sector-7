@@ -3,12 +3,11 @@ import db from '../models/index.js';
 const { Profesor, Asistencia } = db;
 import { Op } from 'sequelize';
 
-
 const diasSemana = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 function obtenerNombreDia(fecha) {
   const day = dayjs(fecha).day();
-  return diasSemana[(day + 6) % 7]; // Lunes = 0
+  return diasSemana[(day + 6) % 7];
 }
 
 function sumarHoras(horasArray) {
@@ -33,7 +32,6 @@ async function generarExcelAsistencia(inicio, fin) {
     }
   });
 
-  // Agrupar por profesor y semana
   const semanas = [];
   let actual = dayjs(inicio).startOf('week');
   while (actual.isBefore(fin)) {
@@ -56,8 +54,8 @@ async function generarExcelAsistencia(inicio, fin) {
       horas_contrato: prof.horas_contrato || '0',
       semanas: {},
       total_horas: '00:00',
-      tardanzas: 0, // A futuro se puede implementar lógica
-      horas_a_ingresar: '00:00' // Inicialmente igual al total
+      tardanzas: 0,
+      horas_a_ingresar: '00:00'
     };
 
     let totalHorasPeriodo = [];

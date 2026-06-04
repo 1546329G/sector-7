@@ -1,11 +1,5 @@
-// backend/routes/horarioFeriadoRoutes.js (AHORA SÍ CON EXPORTACIÓN CORRECTA)
-
 import express from 'express';
-// Importante: La ruta de db.js desde este archivo.
-// Si horarioFeriadoRoutes.js está en backend/api1/routes/, entonces la ruta es '../../../db.js'
-// Si horarioFeriadoRoutes.js está en backend/routes/ (y app.js lo importa desde api1/routes/), entonces la ruta es '../../db.js'
-// Asumo que está en 'backend/api1/routes/', por lo tanto:
-import { getDatabasePool } from '../../db.js'; // <-- ¡CORRECCIÓN DE RUTA para este archivo!
+import { getDatabasePool } from '../db.js';
 
 const router = express.Router();
 
@@ -19,12 +13,6 @@ let dbPool;
     }
 })();
 
-
-// ----------------------------------------------------------------
-// RUTAS DE HORARIOS Y FERIADOS
-// ----------------------------------------------------------------
-
-// Ruta para obtener horarios de un profesor específico
 router.get('/horarios/profesor/:id_profesor', async (req, res) => {
     if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { id_profesor } = req.params;
@@ -41,7 +29,6 @@ router.get('/horarios/profesor/:id_profesor', async (req, res) => {
     }
 });
 
-// Ruta para obtener todos los feriados
 router.get('/feriados', async (req, res) => {
     if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     let connection;
@@ -57,7 +44,6 @@ router.get('/feriados', async (req, res) => {
     }
 });
 
-// Ruta para insertar un nuevo feriado
 router.post('/feriados', async (req, res) => {
     if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { id, fecha, descripcion, estado } = req.body;
@@ -87,7 +73,6 @@ router.post('/feriados', async (req, res) => {
     }
 });
 
-// Ruta para insertar un nuevo horario
 router.post('/horarios', async (req, res) => {
     if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { id, id_profesor, hora_entrada, hora_salida, estado } = req.body;
@@ -120,4 +105,4 @@ router.post('/horarios', async (req, res) => {
     }
 });
 
-export default router; // <-- ¡ESTO ES LO QUE DEBE CAMBIAR!
+export default router;

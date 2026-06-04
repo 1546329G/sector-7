@@ -6,7 +6,6 @@ import isBetween from 'dayjs/plugin/isBetween.js';
 import duration from 'dayjs/plugin/duration.js';
 import { Op } from 'sequelize';
 
-
 const { Asistencia, Profesor, Horario } = db;
 
 dayjs.extend(localizedFormat);
@@ -14,8 +13,6 @@ dayjs.locale(es);
 dayjs.extend(isBetween);
 dayjs.extend(duration);
 
-
-// utilidad para sumar horas como strings "HH:mm"||Funcion de utilidad
 function sumarHoras(arrayHoras) {
     let total = dayjs.duration();
     arrayHoras.forEach(h => {
@@ -27,7 +24,6 @@ function sumarHoras(arrayHoras) {
     return `${h}:${m}`;
 }
 
-// genera las semanas dentro de un periodo (del 20 al 19 del siguiente mes)||Funcion de utilidad
 function generarSemanasDelPeriodo(inicioPeriodo, finPeriodo) {
     const semanas = [];
     let actual = inicioPeriodo.clone().startOf('week');
@@ -47,7 +43,6 @@ function generarSemanasDelPeriodo(inicioPeriodo, finPeriodo) {
     return semanas.filter(sem =>
         dayjs(sem.inicio).isBetween(inicioPeriodo.clone().subtract(1, 'day'), finPeriodo.clone().add(1, 'day'), null, '[]')
     );
-
 }
 
 async function getAsistenciaSemanaActual(inicio, fin) {
@@ -68,7 +63,6 @@ async function getAsistenciaSemanaActual(inicio, fin) {
         numero: null
     };
 
-
     const profesores = await Profesor.findAll({
         include: [{ model: Horario }]
     });
@@ -81,7 +75,7 @@ async function getAsistenciaSemanaActual(inicio, fin) {
             const fechaDia = fechaInicio.add(d, 'day');
             if (fechaDia.isAfter(fechaFin)) break;
 
-            const nombreDia = fechaDia.format('dddd').toLowerCase(); // ej. 'monday'
+            const nombreDia = fechaDia.format('dddd').toLowerCase();
             const horariosDia = profesor.Horarios.filter(h => h.dia_semana.toLowerCase() === nombreDia);
 
             const horas = horariosDia.map(h => {
@@ -135,7 +129,6 @@ async function getAsistenciaSemanaHistorico(inicio, fin) {
         where: {
             fecha: {
                 [Op.between]: [inicio, fin]
-
             }
         },
         include: [{ model: Profesor }]

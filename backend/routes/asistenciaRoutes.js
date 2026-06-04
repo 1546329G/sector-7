@@ -1,7 +1,5 @@
-// backend/routes/asistenciaRoutes.js (AHORA SÍ CON EXPORTACIÓN CORRECTA)
-
 import express from 'express';
-import { getDatabasePool } from '../../db.js'; // Asegúrate del .js al final
+import { getDatabasePool } from '../db.js';
 const router = express.Router();
 
 let dbPool;
@@ -14,11 +12,6 @@ let dbPool;
     }
 })();
 
-// ----------------------------------------------------------------
-// RUTAS DE ASISTENCIAS
-// ----------------------------------------------------------------
-
-// Ruta para obtener todas las asistencias con detalles del profesor (JOIN)
 router.get('/asistencias', async (req, res) => {
     if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     let connection;
@@ -48,7 +41,6 @@ router.get('/asistencias', async (req, res) => {
     }
 });
 
-// Ruta para insertar una nueva asistencia
 router.post('/asistencias', async (req, res) => {
     if (!dbPool) { return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida.' }); }
     const { id, fecha, horas, tardanza, justificacion, estado } = req.body;
@@ -81,4 +73,4 @@ router.post('/asistencias', async (req, res) => {
     }
 });
 
-export default router; // <-- ¡ESTO ES LO QUE DEBE CAMBIAR!
+export default router;

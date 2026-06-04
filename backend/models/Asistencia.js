@@ -1,4 +1,4 @@
-export default(sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   const Asistencia = sequelize.define('Asistencia', {
     id: {
       type: DataTypes.STRING,

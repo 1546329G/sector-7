@@ -13,7 +13,7 @@ export default (sequelize, DataTypes) => {
     hora_salida: {
       type: DataTypes.TIME
     },
-    dia_semana: { 
+    dia_semana: {
       type: DataTypes.STRING
     },
     estado: {

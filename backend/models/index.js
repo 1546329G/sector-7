@@ -30,7 +30,6 @@ db.Profesor = ProfesorModel(sequelize, DataTypes);
 db.Asistencia = AsistenciaModel(sequelize, DataTypes);
 db.Horario = HorarioModel(sequelize, DataTypes);
 
-// Relaciones
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);

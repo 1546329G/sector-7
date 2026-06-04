@@ -1,6 +1,4 @@
-// backend/db.js
-
-import mysql from 'mysql2/promise'; // <-- ¡Cambio aquí!
+import mysql from 'mysql2/promise';
 
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
@@ -12,7 +10,7 @@ const dbConfig = {
 
 let dbPool;
 
-export async function getDatabasePool() { // <-- ¡Cambio aquí! 'export'
+export async function getDatabasePool() {
     if (dbPool) {
         return dbPool;
     }
