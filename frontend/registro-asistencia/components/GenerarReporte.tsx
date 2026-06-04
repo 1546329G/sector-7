@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import '../css/GenerarReporte.css';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { MAIN_URL } from '../src/config';
+import { API_URL } from '../src/config';
 
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -23,7 +23,7 @@ const GenerarReporte: React.FC = () => {
       return;
     }
 
-    const apiUrl = `${MAIN_URL}/generar-informe?inicio=${fechaInicio}&fin=${fechaFin}`;
+    const apiUrl = `${API_URL}/generar-informe?inicio=${fechaInicio}&fin=${fechaFin}`;
 
     try {
       // 1. Obtener los datos de tu API

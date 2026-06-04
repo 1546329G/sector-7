@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../css/AdministrarUsuario.css'; 
-import { API1_URL } from '../src/config';
+import { API_URL } from '../src/config';
 
-const API_BASE_URL = API1_URL; 
+const API_BASE_URL = API_URL; 
 
 interface Profesor {
   id: string; 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../css/AdministrarHorario.css';
-import { API1_URL, API2_URL } from '../src/config';
+import { API_URL } from '../src/config';
 
-const API_HORARIOS_URL = `${API2_URL}/api/horarios`;
-const API_PROFESORES_URL = `${API1_URL}/profesores`;
+const API_HORARIOS_URL = `${API_URL}/api/horarios`;
+const API_PROFESORES_URL = `${API_URL}/profesores`;
 
 interface Horario {
   id: string;
@@ -53,8 +53,8 @@ const GestionHorarios: React.FC = () => {
     try {
       // Obtener datos de ambas APIs en paralelo
       const [horariosResponse, profesoresResponse] = await Promise.all([
-        axios.get<Horario[]>(API_HORARIOS_URL), // GET http://localhost:5011/api/horarios
-        axios.get<ProfesorSimple[]>(`${API_PROFESORES_URL}?estado=Activo`) // GET http://localhost:5009/profesores?estado=Activo
+        axios.get<Horario[]>(API_HORARIOS_URL),
+        axios.get<ProfesorSimple[]>(`${API_PROFESORES_URL}?estado=Activo`)
       ]);
 
       const fetchedHorarios = horariosResponse.data;
@@ -180,7 +180,7 @@ const GestionHorarios: React.FC = () => {
     }
     setMainMessage(null);
     try {
-      await axios.delete(`${API_HORARIOS_URL}/${horarioId}`); // DELETE http://localhost:5011/api/horarios/:id
+      await axios.delete(`${API_HORARIOS_URL}/${horarioId}`);
       fetchData();
       setMainMessage({ type: 'success', text: `Horario ${horarioId} eliminado exitosamente.` });
 

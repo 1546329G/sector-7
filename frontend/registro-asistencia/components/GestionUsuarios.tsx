@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../css/NuevoUsuario.css';
-import { API3_URL } from '../src/config';
+import { API_URL } from '../src/config';
 
 // --- Interfaces actualizadas para reflejar la tabla de MariaDB ---
 interface User {
@@ -32,8 +32,8 @@ const GestionUsuarios: React.FC = () => {
     const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
 
     // --- URLs de tu API Backend ---
-    const API_AUTH_URL = `${API3_URL}/api/auth`;
-    const API_USERS_URL = `${API3_URL}/api/users`;
+    const API_AUTH_URL = `${API_URL}/api/auth`;
+    const API_USERS_URL = `${API_URL}/api/users`;
 
     // Función para obtener el token JWT del localStorage
     const getToken = useCallback(() => {
