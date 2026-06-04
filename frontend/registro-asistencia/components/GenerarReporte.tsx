@@ -1,23 +1,21 @@
 import React, { useState, useRef } from 'react';
-import '../css/GenerarReporte.css'; 
-import * as XLSX from 'xlsx'; 
-import { saveAs } from 'file-saver'; 
+import '../css/GenerarReporte.css';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { MAIN_URL } from '../src/config';
 
-// Importar componentes y registros de Chart.js (si los usas para gráficos en el frontend)
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-// Registrar los componentes de Chart.js que vamos a usar globalmente
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const GenerarReporte: React.FC = () => {
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
   const [mensaje, setMensaje] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [cargando, setCargando] = useState(false); // Estado para indicar que se está cargando/generando
+  const [cargando, setCargando] = useState(false);
 
-  // Función para manejar la descarga del informe Excel
   const handleDownloadExcel = async () => {
-    setMensaje(null); // Limpiar mensajes anteriores
-    setCargando(true); // Activar estado de carga
+    setMensaje(null);
+    setCargando(true);
 
     if (!fechaInicio || !fechaFin) {
       setMensaje({ type: 'error', text: 'Por favor, selecciona tanto la fecha de inicio como la de fin.' });
@@ -25,8 +23,7 @@ const GenerarReporte: React.FC = () => {
       return;
     }
 
-    // URL de tu API principal que provee los datos de los profesores
-    const apiUrl = `http://localhost:3000/generar-informe?inicio=${fechaInicio}&fin=${fechaFin}`;
+    const apiUrl = `${MAIN_URL}/generar-informe?inicio=${fechaInicio}&fin=${fechaFin}`;
 
     try {
       // 1. Obtener los datos de tu API

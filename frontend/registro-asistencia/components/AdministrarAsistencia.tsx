@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../css/AdministrarAsistencia.css'; // Ensure this CSS file is adapted or created
+import '../css/AdministrarAsistencia.css';
 import dayjs from 'dayjs';
+import { API1_URL, MAIN_URL } from '../src/config';
 
 interface Periodo {
   value: string;
@@ -77,7 +78,7 @@ const AdministrarAsistencia: React.FC = () => {
   useEffect(() => {
   async function fetchProfessors() {
     try {
-      const res = await fetch('http://localhost:5009/profesores');
+      const res = await fetch(`${API1_URL}/profesores`);
       const data = await res.json();
 
       const activos: Professor[] = data
@@ -109,7 +110,7 @@ const AdministrarAsistencia: React.FC = () => {
   useEffect(() => {
     async function fetchPeriodos() {
       try {
-        const res = await fetch('http://localhost:3000/reporte-asistencia/periodos');
+        const res = await fetch(`${MAIN_URL}/reporte-asistencia/periodos`);
         const data = await res.json();
 
         const opciones: Periodo[] = data.map((item: any) => ({
@@ -141,7 +142,7 @@ const AdministrarAsistencia: React.FC = () => {
     async function fetchSemanas(periodoStr: string) {
       if (!selectedPeriod) return;
       try {
-        const res = await fetch(`http://localhost:3000/reporte-asistencia/semanas?periodo=${periodoStr}`);
+        const res = await fetch(`${MAIN_URL}/reporte-asistencia/semanas?periodo=${periodoStr}`);
         const data = await res.json();
 
         const opciones: Semana[] = data.map((item: any) => ({
@@ -202,7 +203,7 @@ const AdministrarAsistencia: React.FC = () => {
     const { inicio, fin } = JSON.parse(selectedPeriod);
 
     try {
-      const res = await fetch(`http://localhost:3000/reporte-asistencia?inicio=${inicio}&fin=${fin}&modo=periodo&profesor_id=${selectedProfessorId}`);
+      const res = await fetch(`${MAIN_URL}/reporte-asistencia?inicio=${inicio}&fin=${fin}&modo=periodo&profesor_id=${selectedProfessorId}`);
       const json = await res.json();
       const profesor = json.datos[0];
 
@@ -309,7 +310,7 @@ const loadAllProfessorsForWeek = useCallback(async () => {
     setIsLoading(true);
     setMessage(null);
 
-    const res = await fetch(`http://localhost:3000/reporte-asistencia?inicio=${inicio}&fin=${fin}&modo=semana`);
+    const res = await fetch(`${MAIN_URL}/reporte-asistencia?inicio=${inicio}&fin=${fin}&modo=semana`);
     const json = await res.json();
 
     const datos = json.datos || [];

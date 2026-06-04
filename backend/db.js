@@ -39,6 +39,7 @@ export async function getDatabasePool() { // <-- ¡Cambio aquí! 'export'
             syscall: error.syscall,
             message: error.message
         });
-        process.exit(1);
+        console.warn('El servidor continuará pero las funciones de BD no estarán disponibles hasta que se configure la conexión.');
+        return null;
     }
 }

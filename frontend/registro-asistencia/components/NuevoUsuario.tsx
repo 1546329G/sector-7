@@ -1,6 +1,7 @@
 // NuevoUsuario.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import '../css/NuevoUsuario.css'; 
+import { API3_URL } from '../src/config';
 
 // --- Interfaces para los datos de usuario ---
 interface User {
@@ -36,9 +37,9 @@ const NuevoUsuario: React.FC = () => {
     // --- Estado para el conteo de usuarios ---
     const [userCount, setUserCount] = useState<number | null>(null);
 
-    // --- URLs de tu API Backend (confirmado que usa el puerto 5010) ---
-    const API_AUTH_URL = 'http://localhost:5010/api/auth';
-    const API_USERS_URL = 'http://localhost:5010/api/users'; // URL para obtener usuarios y el conteo
+    // --- URLs de tu API Backend ---
+    const API_AUTH_URL = `${API3_URL}/api/auth`;
+    const API_USERS_URL = `${API3_URL}/api/users`;
 
     // --- Función para obtener el token JWT del localStorage ---
     const getToken = useCallback(() => {

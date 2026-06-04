@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API3_URL } from '../src/config';
 
 interface LoginProps {
     onLoginSuccess?: () => void;
@@ -14,8 +15,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const [success, setSuccess] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    // Configuración para entorno local
-    const API_AUTH_BASE_URL = 'http://localhost:5010/api/auth';
+    const API_AUTH_BASE_URL = `${API3_URL}/api/auth`;
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

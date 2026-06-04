@@ -1,7 +1,7 @@
 // backend/server.js
 
-// 1. Cargar dotenv al inicio para que process.env esté disponible
-import 'dotenv/config';
+// 1. Cargar dotenv al inicio (importante: debe ser el primer import)
+import './load-env.js';
 
 // 2. Importar tus aplicaciones de Express
 import express from 'express'; // Keep this for the main app

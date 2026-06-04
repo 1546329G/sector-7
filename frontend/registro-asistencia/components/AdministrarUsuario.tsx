@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../css/AdministrarUsuario.css'; 
+import { API1_URL } from '../src/config';
 
-// Define la URL base de tu API de Profesores en el puerto 5009
-// Confirmamos que esta es la URL donde tu API 1 (Principal) debería estar escuchando para /profesores
-const API_BASE_URL = 'http://localhost:5009'; 
+const API_BASE_URL = API1_URL; 
 
 interface Profesor {
   id: string; 

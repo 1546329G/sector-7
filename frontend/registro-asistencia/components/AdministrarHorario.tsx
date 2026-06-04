@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../css/AdministrarHorario.css';
+import { API1_URL, API2_URL } from '../src/config';
 
-// Define las URLs base de tus APIs
-const API_HORARIOS_URL = 'http://localhost:5011/api/horarios'; // API 2 - Horarios
-const API_PROFESORES_URL = 'http://localhost:5009/profesores'; // API 1 - Principal
+const API_HORARIOS_URL = `${API2_URL}/api/horarios`;
+const API_PROFESORES_URL = `${API1_URL}/profesores`;
 
 interface Horario {
   id: string;

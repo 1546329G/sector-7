@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../css/NuevoUsuario.css'; // Asegúrate de que este archivo CSS exista
+import '../css/NuevoUsuario.css';
+import { API3_URL } from '../src/config';
 
 // --- Interfaces actualizadas para reflejar la tabla de MariaDB ---
 interface User {
@@ -31,9 +32,8 @@ const GestionUsuarios: React.FC = () => {
     const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
 
     // --- URLs de tu API Backend ---
-    const API_AUTH_URL = 'http://localhost:5009/api/auth'; // Endpoint para autenticación/registro
-    // IMPORTANTÍSIMO: Necesitas que estas rutas existan en tu API para que PUT/DELETE/GET de usuarios funcionen
-    const API_USERS_URL = 'http://localhost:5009/api/users'; // Endpoint para gestión de usuarios (CRUD)
+    const API_AUTH_URL = `${API3_URL}/api/auth`;
+    const API_USERS_URL = `${API3_URL}/api/users`;
 
     // Función para obtener el token JWT del localStorage
     const getToken = useCallback(() => {
