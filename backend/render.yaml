@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: sector7-backend
+    env: node
+    region: ohio
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 3044
+      - key: JWT_SECRET
+        value: GANDUENDsha5454f6543fffbfs%6/8()
+      - key: DB_HOST
+        value: srv805.hstgr.io
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_USER
+        value: u666383048_gandy
+      - key: DB_PASSWORD
+        value: safsacgersdvca/A32
+      - key: DB_NAME
+        value: u666383048_sector7_2026
+      - key: DB_DIALECT
+        value: mysql

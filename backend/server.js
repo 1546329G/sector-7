@@ -20,7 +20,12 @@ const app = express();
 const PORT = process.env.PORT || 3044;
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3044']
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3044',
+    'https://frontend-orpin-six-72.vercel.app'
+  ]
 }));
 app.use(express.json());
 
