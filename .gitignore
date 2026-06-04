@@ -1,5 +1,4 @@
 node_modules/
-.opencode/
 /dist
 /.env
 /database.sql
