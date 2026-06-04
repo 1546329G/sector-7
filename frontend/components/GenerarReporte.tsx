@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import '../css/GenerarReporte.css';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';

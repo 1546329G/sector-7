@@ -89,7 +89,7 @@ const GestionDocente: React.FC = () => {
       };
 
       // Ruta completa para añadir profesor
-      const response = await axios.post(`${API_BASE_URL}/profesores`, newProfesorData);
+      await axios.post(`${API_BASE_URL}/profesores`, newProfesorData);
       
       setAddMessage({ type: 'success', text: `Docente ${newNombre} añadido exitosamente!` });
       setMainMessage({ type: 'success', text: `Docente ${newNombre} añadido exitosamente.` });

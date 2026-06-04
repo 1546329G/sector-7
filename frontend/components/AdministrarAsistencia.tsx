@@ -70,7 +70,7 @@ const AdministrarAsistencia: React.FC = () => {
   const [allProfessorsAttendanceData, setAllProfessorsAttendanceData] = useState<AllProfessorsWeeklyEntry[]>([]);
 
   const [semanas, setSemanas] = useState<Semana[]>([]);
-  const [semanaSeleccionada, setSemanaSeleccionada] = useState<string>("");
+  const [, setSemanaSeleccionada] = useState<string>("");
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: 'info' | 'error' | 'success'; text: string } | null>(null);
@@ -168,11 +168,7 @@ const AdministrarAsistencia: React.FC = () => {
     }
   }, [selectedPeriod]);
 
-  const handleSemanaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSemanaSeleccionada(e.target.value);
-    const semana = semanas.find(s => s.label === e.target.value);
-    console.log("Semana seleccionada:", semana);
-  };
+  // handleSemanaChange eliminada (no utilizada)
 
   // Load professor details for single professor view
   useEffect(() => {

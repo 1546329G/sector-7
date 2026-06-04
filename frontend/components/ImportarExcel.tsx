@@ -1,5 +1,6 @@
 // src/components/ImportarExcel.tsx
-import React, { useState, ChangeEvent, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
+import type { ChangeEvent } from 'react';
 import * as XLSX from 'xlsx';
 import '../css/importar-exel.css'; // Asegúrate de que este archivo CSS existe y está bien definido.
 
