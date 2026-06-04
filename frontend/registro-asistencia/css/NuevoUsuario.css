@@ -1,0 +1,363 @@
+/* NuevoUsuario.css */
+
+/* Contenedor principal de la gestión de usuarios */
+.gestion-usuarios-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f4f7f6;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+/* Título principal */
+.gestion-usuarios-title {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    font-size: 2.2rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+/* Estilos para las tarjetas de información (crear, conteo, lista) */
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.card h3 {
+    color: #34495e;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    border-bottom: 1px dashed #dcdcdc;
+    padding-bottom: 0.5rem;
+}
+
+/* Mensajes de feedback (éxito, error, info) */
+.message-feedback {
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.message-feedback.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.message-feedback.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+.message-feedback.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-color: #bee5eb;
+}
+
+/* Formulario de nuevo usuario */
+.new-user-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.new-user-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.new-user-form input[type="text"],
+.new-user-form input[type="password"],
+.new-user-form select {
+    width: calc(100% - 20px); /* Adjusting for padding */
+    padding: 0.8rem 10px;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+.new-user-form input[type="text"]:focus,
+.new-user-form input[type="password"]:focus,
+.new-user-form select:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.create-user-button {
+    background-color: #28a745;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.create-user-button:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.create-user-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Conteo de usuarios */
+.users-count-card .user-count {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+    color: #2980b9;
+    margin: 1rem 0;
+}
+
+/* Tabla de usuarios */
+.users-table-container {
+    overflow-x: auto; /* Permite desplazamiento horizontal si la tabla es muy ancha */
+}
+
+.users-list-card table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.users-list-card th,
+.users-list-card td {
+    border: 1px solid #ddd;
+    padding: 0.8rem;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.users-list-card th {
+    background-color: #3498db;
+    color: white;
+    font-weight: 600;
+    white-space: nowrap; /* Previene que los encabezados se rompan en múltiples líneas */
+}
+
+.users-list-card tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.users-list-card tr:hover {
+    background-color: #f1f1f1;
+}
+
+.users-list-card td input[type="text"],
+.users-list-card td select {
+    width: calc(100% - 16px); /* Adjusting for padding */
+    padding: 0.5rem 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.users-list-card td input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-left: 5px;
+}
+
+/* Columna de acciones en la tabla */
+.actions-column {
+    white-space: nowrap; /* Evita que los botones se envuelvan */
+    min-width: 250px; /* Asegura espacio suficiente para los botones */
+}
+
+.actions-column button {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.actions-column button:last-child {
+    margin-right: 0;
+}
+
+.edit-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.save-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.save-button:hover:not(:disabled) {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-button:hover:not(:disabled) {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+.toggle-status-button {
+    color: white;
+}
+
+/* Específico para el botón de toggle status basado en el estado activo */
+.toggle-status-button-active { /* Cuando el usuario está activo, el botón es para "Desactivar" (rojo) */
+    background-color: #dc3545; /* Rojo */
+}
+
+.toggle-status-button-active:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+.toggle-status-button-inactive { /* Cuando el usuario está inactivo, el botón es para "Activar" (verde) */
+    background-color: #28a745; /* Verde */
+}
+
+.toggle-status-button-inactive:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.actions-column button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .gestion-usuarios-container {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    .gestion-usuarios-title {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .users-list-card table,
+    .users-list-card thead,
+    .users-list-card tbody,
+    .users-list-card th,
+    .users-list-card td,
+    .users-list-card tr {
+        display: block;
+    }
+
+    .users-list-card thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .users-list-card tr {
+        border: 1px solid #ddd;
+        margin-bottom: 0.8rem;
+    }
+
+    .users-list-card td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%; /* Espacio para el pseudo-elemento del label */
+        text-align: right;
+    }
+
+    .users-list-card td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+    }
+
+    /* Asignar data-label para cada celda para el responsive */
+    .users-list-card td:nth-of-type(1):before { content: "ID:"; }
+    .users-list-card td:nth-of-type(2):before { content: "Usuario:"; }
+    .users-list-card td:nth-of-type(3):before { content: "Rol:"; }
+    .users-list-card td:nth-of-type(4):before { content: "Activo:"; }
+    .users-list-card td:nth-of-type(5):before { content: "Creado En:"; }
+    .users-list-card td:nth-of-type(6):before { content: "Actualizado En:"; }
+    .users-list-card td:nth-of-type(7):before { content: "Acciones:"; }
+
+    .actions-column {
+        text-align: center;
+        padding-top: 1rem;
+        padding-bottom: 0.5rem;
+    }
+    .actions-column button {
+        display: block;
+        width: calc(100% - 1rem); /* Full width with some padding */
+        margin: 0.5rem auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .gestion-usuarios-title {
+        font-size: 1.5rem;
+    }
+
+    .new-user-form input,
+    .new-user-form select,
+    .create-user-button {
+        padding: 0.7rem;
+        font-size: 0.95rem;
+    }
+
+    .actions-column button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+    }
+}
