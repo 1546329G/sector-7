@@ -1,11 +1,15 @@
 import mysql from 'mysql2/promise';
+import dns from 'dns';
 
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'railway',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
+    connectTimeout: 8000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0
 };
 
 let dbPool;
