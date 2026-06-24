@@ -1,8 +1,11 @@
-// Carga las variables de entorno desde el .env raíz del proyecto
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-dotenv.config({ path: resolve(__dirname, '../.env') });
+const envPath = resolve(__dirname, '../.env');
+if (existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}

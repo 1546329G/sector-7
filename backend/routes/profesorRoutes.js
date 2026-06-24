@@ -9,8 +9,7 @@ let dbPool;
         dbPool = await getDatabasePool();
         console.log('[profesorRoutes] Conexión a la base de datos para profesores establecida.');
     } catch (error) {
-        console.error('[profesorRoutes] No se pudo establecer la conexión a la base de datos para las rutas de profesores. Terminando...', error);
-        process.exit(1);
+        console.error('[profesorRoutes] No se pudo establecer la conexión a la base de datos:', error);
     }
 })();
 

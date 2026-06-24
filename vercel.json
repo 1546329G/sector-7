@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/profesores(.*)", "destination": "/api/index" },
+    { "source": "/asistencias(.*)", "destination": "/api/index" },
+    { "source": "/horarios(.*)", "destination": "/api/index" },
+    { "source": "/feriados(.*)", "destination": "/api/index" },
+    { "source": "/reporte-asistencia(.*)", "destination": "/api/index" },
+    { "source": "/generar-informe(.*)", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

@@ -8,8 +8,7 @@ let dbPool;
     try {
         dbPool = await getDatabasePool();
     } catch (error) {
-        console.error('No se pudo establecer la conexión a la base de datos para las rutas de horarios/feriados. Terminando...', error);
-        process.exit(1);
+        console.error('No se pudo establecer la conexión a la base de datos para las rutas de horarios/feriados:', error);
     }
 })();
 
