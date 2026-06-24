@@ -13,7 +13,7 @@ let dbPool;
     }
 })();
 
-router.use((req, res, next) => {
+router.use('/profesores', (req, res, next) => {
     if (!dbPool) {
         return res.status(500).json({ message: 'Error: La conexión a la base de datos no está establecida para profesores.' });
     }

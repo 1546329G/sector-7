@@ -1,5 +1,4 @@
 import mysql from 'mysql2/promise';
-import dns from 'dns';
 
 const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
@@ -7,9 +6,10 @@ const dbConfig = {
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'railway',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-    connectTimeout: 8000,
+    connectTimeout: 9000,
     enableKeepAlive: true,
-    keepAliveInitialDelay: 0
+    keepAliveInitialDelay: 0,
+    family: 4
 };
 
 let dbPool;
